@@ -1,0 +1,158 @@
+<div class="ai-container">
+  <!-- Gradient background overlay -->
+  <div class="gradient-overlay"></div>
+
+  <!-- Main content container -->
+  <div class="ai-content">
+    <!-- Left section with main content -->
+    <div class="ai-left">
+      <!-- Navigation bar -->
+      <nav class="ai-nav">
+        <div class="ai-logo">CVParser<span class="ai-highlight">.AI</span></div>
+        <div class="ai-nav-links">
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#api">API Docs</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </nav>
+
+      <!-- Main headline -->
+      <div class="ai-headline"   [class.hidden]="fileUploaded">
+        <h1>Extract <span class="ai-highlight">CV Data</span> with AI Precision</h1>
+        <p class="ai-subhead">The most accurate, affordable, and easy-to-integrate CV parsing API on the market</p>
+
+        <!-- Stats bar -->
+        <div class="ai-stats">
+          <div class="ai-stat">
+            <div class="ai-stat-number">99.7%</div>
+            <div class="ai-stat-label">Accuracy</div>
+          </div>
+          <div class="ai-stat">
+            <div class="ai-stat-number">50ms</div>
+            <div class="ai-stat-label">Avg Response</div>
+          </div>
+          <div class="ai-stat">
+            <div class="ai-stat-number">100+</div>
+            <div class="ai-stat-label">Formats</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parser demo section -->
+      <div class="ai-parser-demo" [class.shifted-left]="shiftleft">
+        <h2>See the AI in Action</h2>
+
+        <!-- Demo card -->
+        <div class="ai-demo-card">
+          <div class="ai-demo-header">
+            <!-- <div class="ai-demo-tabs">
+              <div class="ai-demo-tab active">Parsed Data</div>
+              <div class="ai-demo-tab">Raw Input</div>
+            </div> -->
+            <div class="ai-demo-actions">
+              <button class="ai-button secondary">Reset</button>
+              <button class="ai-button primary" (click)="downloadFile()">
+                <i class="ai-icon-download"></i> Download JSON
+              </button>
+            </div>
+          </div>
+
+          <!-- Parsed data display -->
+          <div class="ai-parsed-data">
+            <div class="ai-data-field" *ngFor="let field of dataFields">
+              <div class="ai-data-label">
+                <i class="ai-icon-{{field.icon}}"></i>
+                {{field.label}}
+              </div>
+              <div class="ai-data-value" [class.missing]="!parserData[field.key]">
+                <!-- Display parsed data or 'Not available' if not found -->
+                {{ parserData[field.key] }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Integration CTA -->
+        <div class="ai-integration">
+          <p>Ready to integrate? Get your API key in minutes</p>
+          <button class="ai-button cta">Get Started Free</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right section with upload and info -->
+    <div class="ai-right" [class.hidden]="fileUploaded" style="border: 2px solid white;">
+      <div class="ai-upload-container">
+        <h2>Try It Yourself</h2>
+        <p class="ai-upload-desc">Upload a CV to see our AI in action</p>
+
+        <!-- Upload area with drag and drop -->
+        <div class="ai-upload-area" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)">
+          <div class="ai-upload-icon">
+            <i class="ai-icon-upload"></i>
+          </div>
+          <p>Drag & drop your CV here</p>
+          <p class="ai-upload-or">or</p>
+          <label for="cv-upload" class="ai-upload-button">
+            Browse Files
+            <input type="file" id="cv-upload" (change)="onFileUpload($event)">
+          </label>
+          <p class="ai-upload-formats">Supports PDF, DOCX, TXT, and images</p>
+        </div>
+
+        <!-- Features list -->
+        <div class="ai-features">
+          <div class="ai-feature">
+            <i class="ai-icon-check"></i>
+            <span>Extracts 50+ data fields</span>
+          </div>
+          <div class="ai-feature">
+            <i class="ai-icon-check"></i>
+            <span>Handles messy formats</span>
+          </div>
+          <div class="ai-feature">
+            <i class="ai-icon-check"></i>
+            <span>Multilingual support</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimonials -->
+      <div class="ai-testimonials">
+        <h3>Trusted by HR Teams Worldwide</h3>
+        <div class="ai-testimonial">
+          <div class="ai-testimonial-content">
+            "CVParser.AI reduced our hiring team's screening time by 80% while improving candidate matching accuracy."
+          </div>
+          <div class="ai-testimonial-author">
+            <div class="ai-testimonial-avatar"></div>
+            <div class="ai-testimonial-info">
+              <div class="ai-testimonial-name">Sarah Johnson</div>
+              <div class="ai-testimonial-title">Head of Talent, TechCorp</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="ai-footer">
+    <div class="ai-footer-content">
+      <div class="ai-footer-logo">CVParser<span class="ai-highlight">.AI</span></div>
+      <div class="ai-footer-mission">
+        Our goal is to bring efficiency to all HR companies around the world, no matter their size.
+      </div>
+      <div class="ai-footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">API Status</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="ai-footer-copyright">
+        Made in Paris with AI • © 2023 CVParser.AI
+      </div>
+    </div>
+  </footer>
+</div>
