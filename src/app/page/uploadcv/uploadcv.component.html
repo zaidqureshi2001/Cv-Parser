@@ -18,7 +18,7 @@
       </nav>
 
       <!-- Main headline -->
-      <div class="ai-headline"   [class.hidden]="fileUploaded">
+      <div class="ai-headline" [class.hidden]="fileUploaded">
         <h1>Extract <span class="ai-highlight">CV Data</span> with AI Precision</h1>
         <p class="ai-subhead">The most accurate, affordable, and easy-to-integrate CV parsing API on the market</p>
 
@@ -39,47 +39,221 @@
         </div>
       </div>
 
-      <!-- Parser demo section -->
-      <div class="ai-parser-demo" [class.shifted-left]="shiftleft">
-        <h2>See the AI in Action</h2>
 
-        <!-- Demo card -->
-        <div class="ai-demo-card">
-          <div class="ai-demo-header">
-            <!-- <div class="ai-demo-tabs">
-              <div class="ai-demo-tab active">Parsed Data</div>
-              <div class="ai-demo-tab">Raw Input</div>
-            </div> -->
-            <div class="ai-demo-actions">
-              <button class="ai-button secondary">Reset</button>
-              <button class="ai-button primary" (click)="downloadFile()">
-                <i class="ai-icon-download"></i> Download JSON
-              </button>
+
+      <div class="resume-container" *ngIf="fileUploaded">
+        <h2 class="resume-title">Parsed Resume Data</h2>
+        <div *ngIf="parserData && objectKeys(parserData).length > 0" class="resume-content">
+
+          <!-- Basic Info -->
+          <div class="section-header" (click)="toggleSection('basicInfo')">
+            <div class="section-title-container">
+              <h2 class="section-title">Basic Info</h2>
+              <span class="section-toggle ">{{ showBasicInfo ? '▲' : '▼' }} </span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showBasicInfo" class="section-content">
+            <div class="form-group" *ngIf="parserData['name']">
+              <label>Name:</label>
+              <input type="text" [(ngModel)]="parserData['name']" (ngModelChange)="onDataChange()" name="name">
+            </div>
+            <div class="form-group" *ngIf="parserData['email']">
+              <label>Email:</label>
+              <input type="email" [(ngModel)]="parserData['email']" (ngModelChange)="onDataChange()" name="email">
+            </div>
+            <div class="form-group" *ngIf="parserData['phone']">
+              <label>Phone:</label>
+              <input type="tel" [(ngModel)]="parserData['phone']" (ngModelChange)="onDataChange()" name="phone">
+            </div>
+            <div class="form-group" *ngIf="parserData['location']">
+              <label>Location:</label>
+              <input type="text" [(ngModel)]="parserData['location']" (ngModelChange)="onDataChange()" name="location">
+            </div>
+            <div class="btn-group">
+              <button class="section-btn delete-btn" (click)="deleteBasicInfo()">Delete Section</button>
+            </div>
+            <div *ngIf="!parserData['basic_info']">
+              <button class="section-btn add-btn" (click)="addBasicInfo()">Add Section</button>
             </div>
           </div>
 
-          <!-- Parsed data display -->
-          <div class="ai-parsed-data">
-            <div class="ai-data-field" *ngFor="let field of dataFields">
-              <div class="ai-data-label">
-                <i class="ai-icon-{{field.icon}}"></i>
-                {{field.label}}
+          <!-- Education -->
+          <div class="section-header" (click)="toggleSection('education')">
+            <div class="section-title-container">
+              <h2 class="section-title">Education</h2>
+              <span class="section-toggle">{{ showEducation ? '▲' : '▼' }}</span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showEducation" class="section-content">
+            <div *ngFor="let edu of parserData['education']; let i = index" class="education-item">
+              <div class="form-group">
+                <label>Degree:</label>
+                <input type="text" [(ngModel)]="edu.degree" name="degree{{i}}">
               </div>
-              <div class="ai-data-value" [class.missing]="!parserData[field.key]">
-                <!-- Display parsed data or 'Not available' if not found -->
-                {{ parserData[field.key] }}
+              <div class="form-group">
+                <label>Institution:</label>
+                <input type="text" [(ngModel)]="edu.institution" name="institution{{i}}">
+              </div>
+              <div class="form-group">
+                <label>University:</label>
+                <input type="text" [(ngModel)]="edu.university" name="university{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Year:</label>
+                <input type="text" [(ngModel)]="edu.year" name="year{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Grade:</label>
+                <input type="text" [(ngModel)]="edu.grade" name="grade{{i}}">
               </div>
             </div>
           </div>
+
+          <!-- Profile -->
+          <div class="section-header" (click)="toggleSection('profile')">
+            <div class="section-title-container">
+              <h2 class="section-title">Profile</h2>
+              <span class="section-toggle">{{ showProfile ? '▲' : '▼' }}</span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showProfile" class="section-content">
+            <textarea *ngIf="parserData['profile']" [(ngModel)]="parserData['profile']" (ngModelChange)="onDataChange()"
+              rows="4" class="text-area" name="profile"></textarea>
+          </div>
+
+          <!-- Skills -->
+          <div class="section-header" (click)="toggleSection('skills')">
+            <div class="section-title-container">
+              <h2 class="section-title">Skills</h2>
+              <span class="section-toggle">{{ showSkills ? '▲' : '▼' }}</span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showSkills" class="section-content">
+            <textarea [(ngModel)]="skillsText" (ngModelChange)="onSkillsChange()" rows="4" class="text-area"
+              name="skillsText"></textarea>
+          </div>
+
+          <!-- Experience -->
+          <div class="section-header" (click)="toggleSection('experience')">
+            <div class="section-title-container">
+              <h2 class="section-title">Experience</h2>
+              <span class="section-toggle">{{ showExperience ? '▲' : '▼' }}</span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showExperience" class="section-content">
+            <div *ngFor="let exp of parserData['experience']; let i = index" class="experience-item">
+              <div class="form-group">
+                <label>Title:</label>
+                <input type="text" [(ngModel)]="exp.job_title" name="job_title{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Company:</label>
+                <input type="text" [(ngModel)]="exp.company" name="company{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Duration:</label>
+                <input type="text" [(ngModel)]="exp.duration" name="duration{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Description:</label>
+                <textarea [(ngModel)]="exp.description" rows="3" name="description{{i}}"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projects -->
+          <div class="section-header" (click)="toggleSection('projects')">
+            <div class="section-title-container">
+              <h2 class="section-title">Projects</h2>
+              <span class="section-toggle">{{ showProjects ? '▲' : '▼' }}</span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showProjects" class="section-content">
+            <div *ngFor="let project of parserData['projects']; let i = index" class="project-item">
+              <div class="form-group">
+                <label>Name:</label>
+                <input type="text" [(ngModel)]="project.name" name="project_name{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Description:</label>
+                <textarea [(ngModel)]="project.description" rows="3" name="project_desc{{i}}"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Technologies:</label>
+                <input type="text" [(ngModel)]="project.technologiesString"
+                  (ngModelChange)="updateProjectTechnologies(i)" name="techs{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Link:</label>
+                <input type="text" [(ngModel)]="project.link" name="project_link{{i}}">
+              </div>
+              <div class="btn-group">
+                <button class="section-btn delete-btn" (click)="deleteProject(i)">Delete Section</button>
+              </div>
+            </div>
+            <button class="section-btn add-btn" (click)="addProject()">Add Section</button>
+
+          </div>
+
         </div>
 
-        <!-- Integration CTA -->
-        <div class="ai-integration">
-          <p>Ready to integrate? Get your API key in minutes</p>
-          <button class="ai-button cta">Get Started Free</button>
+        <div *ngIf="isParsing" class="loading-state empty-state">
+          <p>Parsing resume data...</p>
+        </div>
+        <div *ngIf="!isParsing && (!parserData || objectKeys(parserData).length === 0)" class="empty-state">
+          <p>No data available.</p>
         </div>
       </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </div>
+
+
+    <div *ngIf="fileUploaded">
+      <div *ngIf="isParsing">Parsing the file...</div>
+
+      <!-- Render DOCX Content -->
+      <div [innerHTML]="docxHtmlContent" class="docx"></div>
+
+    </div>
+
 
     <!-- Right section with upload and info -->
     <div class="ai-right" [class.hidden]="fileUploaded" style="border: 2px solid white;">

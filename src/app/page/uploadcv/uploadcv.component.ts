@@ -1,35 +1,78 @@
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CvparserService } from '../../cvparser.service';
 import { CommonModule } from '@angular/common';
+import { CvparserService } from '../../cvparser.service';
+import { MatIconModule } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
+
+import * as mammoth from 'mammoth';
 
 @Component({
   selector: 'app-uploadcv',
-  imports: [FormsModule, CommonModule],
-  standalone: true, 
+  standalone: true,
+  imports: [CommonModule, MatIconModule, FormsModule],
   templateUrl: './uploadcv.component.html',
-  styleUrl: './uploadcv.component.css'
+  styleUrls: ['./uploadcv.component.css']
 })
 export class UploadcvComponent {
-  parserData: any = {};
+  parserData: { [key: string]: any } = {};
+  isParsing: boolean = false;
   fileUploaded = false;
-  shiftleft = false;
-
+  showBasicInfo = false;
+  showEducation = false;
+  showProfile = false;
+  showSkills = false;
+  showExperience = false;
+  showProjects = false;
+  docxHtmlContent: string = '';
+  skillsText: string = '';
   
-  // Define the data fields structure
-  dataFields = [
-    { key: 'name', label: 'Full Name', icon: 'name' },
-    { key: 'email', label: 'Email', icon: 'email' },
-    { key: 'phone_number', label: 'Phone', icon: 'phone' },
-    { key: 'address', label: 'Address', icon: 'address' },
-    { key: 'skills', label: 'Skills', icon: 'skills' },
-    { key: 'experience', label: 'Experience', icon: 'experience' },
-    { key: 'education', label: 'Education', icon: 'education' }
-  ];
 
   constructor(private cvParserService: CvparserService) {}
 
-  // Handle file upload
+  ngOnInit() {
+    this.initializeSkills();
+    this.initializeProjects();
+  }
+
+  initializeSkills() {
+    // Ensure skillsText is populated correctly if skills are found in the parsed data
+    if (this.parserData['skills']?.length) {
+      this.skillsText = this.parserData['skills'].join(', ');
+    }
+  }
+
+  initializeProjects() {
+    if (this.parserData['projects']?.length) {
+      this.parserData['projects'].forEach((p: any) => {
+        p.technologiesString = (p.technologies || []).join(', ');
+      });
+    }
+  }
+
+  onSkillsChange() {
+    // Ensure the skills array is updated properly
+    if (this.skillsText) {
+      this.parserData['skills'] = this.skillsText
+        .split(',')
+        .map((skill) => skill.trim())
+        .filter(Boolean);
+    } else {
+      this.parserData['skills'] = [];  // Clear skills if input is empty
+    }
+    console.log('Updated skills:', this.parserData['skills']);
+  }
+
+  updateProjectTechnologies(index: number) {
+    const project = this.parserData['projects']?.[index];
+    if (project) {
+      project.technologies = project.technologiesString
+        .split(',')
+        .map((tech: string) => tech.trim())
+        .filter(Boolean);
+    }
+  }
+
+  // Handle file upload event
   onFileUpload(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -37,55 +80,147 @@ export class UploadcvComponent {
     }
   }
 
+  onDataChange() {
+    console.log('Updated data:', this.parserData);
+  }
 
-
-  // Upload file to the server and receive parsed data
+  // Upload the file and send it to the backend for parsing
   uploadFile(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    this.fileUploaded = true; 
-    this.shiftleft = true;
+    console.log('Uploading file...', file);
+    this.fileUploaded = true;
+    this.isParsing = true;
 
     this.cvParserService.parseCv(formData).subscribe(
       (data) => {
-        this.parserData = data;
-        console.log('Parsed data:', this.parserData);  // Handle the response data here
+        console.log('Full API Response:', data);
+        console.log('Parsed Data:', data.parsed_data);
+
+        // If parsed data exists, process and display it
+        if (data && data.parsed_data) {
+          if (data.docxUrl) {
+            this.convertDocxToHtml(data.docxUrl);
+          }
+          this.parserData = data.parsed_data;
+          this.isParsing = false;
+
+          // Initialize skills if parsed data contains them
+          this.initializeSkills();
+
+          // Conditionally toggle visibility based on available parsed data
+          this.showBasicInfo = this.parserData['name'] || this.showBasicInfo;
+        }
       },
       (error) => {
-        console.error('Error uploading file:', error);  // Handle error here
+        console.error('Error uploading file:', error);
         this.fileUploaded = false;
-        this.shiftleft = false;
+        alert('There was an issue uploading the CV. Please try again.');
       }
     );
   }
 
-  // Download parsed data as JSON
-  downloadFile() {
-    const dataStr = JSON.stringify(this.parserData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-    const exportFileDefaultName = 'parsed-cv-data.json';
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+  // Utility method to get object keys for display
+  objectKeys(obj: any): string[] {
+    return obj ? Object.keys(obj) : [];
   }
 
+  // Format key to make it more readable
+  formatKey(key: string): string {
+    return key.replace(/_/g, ' ');
+  }
 
+  // Handle file drop
+  onFileDrop(event: DragEvent) {
+    event.preventDefault();
+    if (event.dataTransfer?.files) {
+      const file = event.dataTransfer.files[0];
+      this.uploadFile(file);
+    }
+  }
 
-    // Handle file drop
-    onFileDrop(event: DragEvent) {
-      event.preventDefault();
-      if (event.dataTransfer?.files) {
-        const file = event.dataTransfer.files[0];
-        this.fileUploaded = true;
-        this.uploadFile(file);
-        this.shiftleft = true;
-      }
+  // Handle drag over event
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+  }
+
+  toggleSection(section: string) {
+    switch (section) {
+      case 'basicInfo':
+        this.showBasicInfo = !this.showBasicInfo;
+        break;
+      case 'education':
+        this.showEducation = !this.showEducation;
+        break;
+      case 'profile':
+        this.showProfile = !this.showProfile;
+        break;
+      case 'skills':
+        this.showSkills = !this.showSkills;
+        break;
+      case 'experience':
+        this.showExperience = !this.showExperience;
+        break;
+      case 'projects':
+        this.showProjects = !this.showProjects;
+        break;
     }
-  
-    // Prevent default drag over behavior
-    onDragOver(event: DragEvent) {
-      event.preventDefault();
+  }
+
+  convertDocxToHtml(docxUrl: string) {
+    console.log('Attempting to fetch DOCX file:', docxUrl);
+    fetch(docxUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch DOCX: ${response.statusText}`);
+        }
+        return response.arrayBuffer();
+      })
+      .then((buffer) => {
+        console.log('Fetched DOCX file as arrayBuffer.');
+        mammoth.convertToHtml({ arrayBuffer: buffer })
+          .then((result) => {
+            console.log('Mammoth conversion result:', result);
+            this.docxHtmlContent = result.value;
+          })
+          .catch((err) => {
+            console.error('Mammoth conversion error:', err);
+            alert('Mammoth conversion failed.');
+          });
+      })
+      .catch((err) => {
+        console.error('Error fetching DOCX file:', err);
+        alert('Failed to load DOCX file.');
+      });
+  }
+  deleteProject(index:number){
+    (this.parserData['projects'] as any []).splice(index , 1)
+  }
+  addProject(){
+    if(!this.parserData['projects']){
+      this.parserData['projects'] = [];
     }
+
+    this.parserData['projects'].push({
+      name: '',
+      description: '',
+      technologies: [],
+      technologiesString: '',
+      link: ''
+    })
+    
+  }
+  addBasicInfo() {
+    this.parserData['basic_info'] = {
+      name: '',
+      email: '' , 
+      Phone: ''
+      // Add other fields if needed
+    };
+  }
+
+  deleteBasicInfo() {
+    delete this.parserData['basic_info'];
+  }
+
 }

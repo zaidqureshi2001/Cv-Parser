@@ -1,151 +1,243 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+import os
+import re
+import json
 import pdfplumber
 import docx
-import re
-import spacy
-from spacy.matcher import Matcher
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
+from werkzeug.utils import secure_filename
+from agno.agent import Agent
+from agno.models.groq import Groq
+from agno.tools.duckduckgo import DuckDuckGoTools
+from dotenv import load_dotenv
+from pdf2docx import Converter
+
+# Load environment variables
+load_dotenv()
+os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
 app = Flask(__name__)
 CORS(app)
 
-# Load the spaCy model
-nlp = spacy.load("en_core_web_sm")
-matcher = Matcher(nlp.vocab)
+# File upload configuration
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'docx'}  # ✅ Added 'docx'
 
-# Custom Pattern for extracting names (More Accurate)
-name_pattern = [{"POS": "PROPN"}, {"POS": "PROPN"}]
-matcher.add("NAME", [name_pattern])
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+def clean_text(text):
+    text = re.sub(r'\n+', '\n', text)
+    text = re.sub(r'[^\x00-\x7F]+', ' ', text)  # Remove non-ASCII
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+
+def parse_pdf(file_path):
+    text = ""
+    with pdfplumber.open(file_path) as pdf:
+        for page in pdf.pages:
+            if page.extract_text():
+                text += page.extract_text()
+    return text
+
+def parse_docx(file_path):
+    text = ""
+    doc = docx.Document(file_path)
+    for para in doc.paragraphs:
+        text += para.text + "\n"
+    return text
+
+def extract_text(file_path, file_extension):
+    if file_extension == 'pdf':
+        return clean_text(parse_pdf(file_path))
+    elif file_extension == 'docx':
+        return clean_text(parse_docx(file_path))
+    return None
+
+def build_prompt(resume_text):
+    return f"""
+You are a professional resume parser.
+
+From the following resume text, extract the following details in structured JSON format:
+
+1. name  
+2. email  
+3. phone  
+
+4. profile: A short summary or career objective written by the candidate.
+
+5. skills: A list of technical and non-technical skills, tools, technologies, or proficiencies mentioned by the candidate.
+
+6. education: an array of objects with:
+  - degree
+  - institution
+  - university (optional)
+  - year
+  - grade (CGPA/percentage)
+
+7. experience: an array of objects with:
+  - job_title
+  - company
+  - duration (e.g., "Jan 2022 – Dec 2023")
+  - location (if mentioned)
+  - description (summary of responsibilities or achievements)
+
+8. projects: an array of objects with:
+  - name (name of the project)
+  - description (brief description of the project)
+  - technologies (list of technologies used in the project)
+  - link (optional, a link to the project or its source code)
+
+9. certifications: an array of objects with:
+  - certification_name
+  - issuing_organization
+  - date (optional)
+
+10. publications: an array of objects with:
+  - publication_title
+  - publication_link (optional)
+  - publication_date (optional)
+
+11. languages: an array of objects with:
+  - language
+  - proficiency_level (e.g., Fluent, Intermediate, Beginner)
+
+Return the result in valid JSON format like this:
+
+{{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "phone": "+1 123-456-7890",
+  "profile": "Creative and detail-oriented developer passionate about building efficient and scalable web applications.",
+  "skills": ["React", "HTML", "CSS", "JavaScript", "Git", "Tailwind CSS"],
+  "education": [
+    {{
+      "degree": "B.Sc IT",
+      "institution": "XYZ College",
+      "university": "Mumbai University",
+      "year": "2020 - 2023",
+      "grade": "CGPA: 7.5"
+    }}
+  ],
+  "experience": [
+    {{
+      "job_title": "Frontend Developer",
+      "company": "Zuberiya Global",
+      "duration": "March 2023 – Present",
+      "location": "Remote",
+      "description": "Built e-commerce UI using React, Redux Toolkit, and Tailwind CSS, improving load time and user experience."
+    }}
+  ],
+  "projects": [
+    {{
+      "name": "E-commerce Web App",
+      "description": "Built a full-stack e-commerce web application with React, Redux, and integrated Stripe payments.",
+      "technologies": ["React", "Redux", "Stripe API", "Tailwind CSS"],
+      "link": "https://github.com/username/ecommerce-app"
+    }}
+  ],
+  "certifications": [
+    {{
+      "certification_name": "Certified React Developer",
+      "issuing_organization": "React Academy",
+      "date": "2023"
+    }}
+  ],
+  "publications": [
+    {{
+      "publication_title": "The Future of Web Development",
+      "publication_link": "https://example.com/future-of-web",
+      "publication_date": "2022"
+    }}
+  ],
+  "languages": [
+    {{
+      "language": "English",
+      "proficiency_level": "Fluent"
+    }},
+    {{
+      "language": "Spanish",
+      "proficiency_level": "Intermediate"
+    }}
+  ]
+}}
+
+Resume:
+\"\"\" {resume_text} \"\"\"
+"""
+
+def query_groq_qwen(prompt):
+    try:
+        agent = Agent(
+            model=Groq(id="llama3-8b-8192"),
+            description="You are an assistant, please reply based on the question",
+            tools=[DuckDuckGoTools()],
+            markdown=True
+        )
+        response = agent.run(prompt)
+        print("📄 Model Response:\n", response.content)
+        return response.content
+    except Exception as e:
+        print(f"❌ Error querying Groq: {e}")
+        return {"error": "Failed to get response from model"}
+
+def extract_json_from_output(text):
+    try:
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            json_str = match.group()
+            json_obj = json.loads(json_str)
+            return json_obj
+        else:
+            return {"error": "No valid JSON found in response"}
+    except json.JSONDecodeError:
+        return {"error": "Failed to decode JSON from the model's response"}
+    except Exception as e:
+        return {"error": f"Error extracting JSON: {str(e)}"}
 
 @app.route('/parse-cv', methods=['POST'])
 def parse_cv():
-    try:
-        file = request.files['file']
-        file_extension = file.filename.split('.')[-1].lower()
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
 
-        if file_extension == 'pdf':
-            text = extract_text_from_pdf(file)
-        elif file_extension == 'docx':
-            text = extract_text_from_docx(file)
-        else:
-            return jsonify({'error': 'Unsupported file type'}), 400
+    file = request.files['file']
+    filename = secure_filename(file.filename)
 
-        parsed_data = parse_text_to_data(text)
-        return jsonify(parsed_data)
+    if not allowed_file(filename):
+        return jsonify({'error': 'Only PDF files are allowed'}), 400
 
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(file_path)
+    print("File received:", filename)
 
-def extract_text_from_pdf(file):
-    with pdfplumber.open(file) as pdf:
-        text = ''
-        for page in pdf.pages:
-            text += page.extract_text() or ""
-    return text
+    docx_filename = filename.replace('.pdf', '.docx')
+    docx_path = os.path.join(app.config['UPLOAD_FOLDER'], docx_filename)
 
-def extract_text_from_docx(file):
-    doc = docx.Document(file)
-    text = ''
-    for paragraph in doc.paragraphs:
-        text += paragraph.text + "\n"
-    return text
+    print(f"Converting PDF to DOCX: {docx_path}")
+    converter = Converter(file_path)
+    converter.convert(docx_path, start=0, end=None)
+    converter.close()
 
-def parse_text_to_data(text):
-    doc = nlp(text)
-    name = extract_name(doc)
-    data = {
-        'name': name,
-        'email': extract_email(text),
-        'phone_number': extract_phone_number(text),
-        'address': extract_address(text),
-        'skills': extract_skills(text),
-        'experience': extract_experience(text),
-        'education': extract_education(text)
-    }
-    return data
+    docx_url = f'http://localhost:5000/static/uploads/{docx_filename}'
+
+    # Extract text from the original PDF (not DOCX) for accurate parsing
+    resume_text = extract_text(file_path, 'pdf')  # ← CHANGE THIS BACK TO PDF
 
 
-def extract_name(doc):
-    matches = matcher(doc)
-    for match_id, start, end in matches:
-        span = doc[start:end]
-        return span.text
-    return "Name not found"
+    if not resume_text:
+        return jsonify({'error': 'Failed to extract text from the DOCX file'}), 400
 
-def extract_email(text):
-    match = re.search(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", text)
-    return match.group(0) if match else "Email not found"
+    prompt = build_prompt(resume_text)
+    response_text = query_groq_qwen(prompt)
+    parsed_data = extract_json_from_output(response_text)
 
-def extract_phone_number(text):
-    match = re.search(r"(\+?\d{1,3})?[-.\s]?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{4,6}", text)
-    return match.group(0) if match else "Phone number not found"
-
-def extract_address(text):
-    address_patterns = [
-        r"\d{1,4} [A-Za-z0-9.,\- ]+ [A-Za-z]+, [A-Za-z]+",  # e.g., "123 Main Street, New York, NY"
-        r"[A-Za-z]+, [A-Za-z]+"  # e.g., "New York, NY"
-    ]
-    for pattern in address_patterns:
-        match = re.search(pattern, text)
-        if match:
-            return match.group(0)
-    return "Address not found"
-
-def extract_skills(text):
-    skills_list = [
-        'Python', 'Java', 'C++', 'JavaScript', 'Ruby', 'Data Science', 'AI', 'React',
-        'Node.js', 'SQL', 'HTML', 'CSS', 'Django', 'Flask', 'Angular', 'Machine Learning',
-        'Deep Learning', 'Tailwind CSS', 'Redux', 'Problem-solving', 'Communication', 
-        'Bootstrap', 'Tesseract', 'NLP', 'OCR', 'API Development'
-    ]
-    found_skills = [skill for skill in skills_list if skill.lower() in text.lower()]
-    return found_skills if found_skills else ["No skills found"]
-
-def extract_experience(text):
-    experience_keywords = ['experience', 'worked as', 'employment', 'professional experience', 'internship']
-    experience = []
-
-    sentences = text.split('\n')
-    for sentence in sentences:
-        if any(keyword.lower() in sentence.lower() for keyword in experience_keywords):
-            experience.append(sentence.strip())
-
-    return experience if experience else ["No experience found"]
-
-
-def extract_education(text):
-    education_keywords = [
-        'Bachelor\'s Degree', 'Master\'s Degree', 'PhD', 'Doctorate', 'Diploma',
-        'B.Sc.', 'B.Sc. IT', 'B.Sc. Computer Science', 'B.Tech', 'M.Tech', 'M.Sc.',
-        'MCA', 'MBA', 'BE', 'ME', 'MS', 'Information Technology', 'IT', 'Computer Science',
-        'Software Engineering', 'Data Science', 'Artificial Intelligence', 'Machine Learning',
-        'Electronics', 'Electrical Engineering', 'Computer Engineering', 'Cybersecurity',
-        'Networking', 'Cloud Computing', 'Digital Marketing', 'Web Development'
-    ]
-    
-    education_patterns = [
-        r"(Bachelor's Degree in [\w\s]+)",            # e.g., Bachelor's Degree in Computer Science
-        r"(Master's Degree in [\w\s]+)",               # e.g., Master's Degree in Information Technology
-        r"(PhD in [\w\s]+)",                          # e.g., PhD in Machine Learning
-        r"([\w\s]+ Diploma)",                         # e.g., Advanced Diploma in IT
-        r"([\w\s]+ University)",                     # e.g., New York University
-        r"([\w\s]+ College)",                       # e.g., Bunts S.M. Shetty College
-        r"([\w\s]+ Institute)",                     # e.g., Interaction Design Foundation
-        r"([\w\s]+ School of Technology)",          # e.g., School of Information Technology
-    ]
-    
-    found_education = []
-    
-    for pattern in education_patterns:
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        found_education.extend(matches)
-    
-    # Filter results to only include lines containing relevant keywords
-    filtered_education = [edu for edu in found_education if any(keyword.lower() in edu.lower() for keyword in education_keywords)]
-    
-    return filtered_education if filtered_education else ["No education details found"]
-
-
+    return jsonify({
+        'docxUrl': docx_url,
+        'parsed_data': parsed_data
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
