@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+</head>
+
+<body
+  style="height: 100%; display: flex; flex-direction: column; font-family: 'sans-serif'; align-items: center; margin: 0;">
+  <div class="wrapper"
+    style="box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); max-width: 960px; width: 90%;padding: 0px 30px;">
+    <header
+      style="display: flex; flex-direction: row; justify-content: flex-end; align-items: center; width: 100%; color: rgb(71, 69, 69);">
+      <div class="name-container" style="flex: 1 1 auto; text-align: center;">
+        <h1 style="font-weight: 100; letter-spacing: 2px; font-size: 40px;">{{ resumeData?.name }}</h1>
+      </div>
+      <div class="profile-container" style="flex: 0 0 auto; display: flex; padding: 10px;">
+        <div class="social-container"
+          style="display: flex; flex-direction: column; justify-content: center; font-size: 17px; margin-top: 10px;">
+          <ul class="contact-list" style="list-style-type: none;">
+            <li class="email" style="margin-bottom: 5px;">
+              <a href="mailto: yournameemail.com" style="color: rgb(71, 69, 69); text-decoration: none;">
+                <i class="fa fa-envelope" aria-hidden="true"
+                  style="margin-right: 10px; font-size: 20px; vertical-align: middle;"></i>
+              </a>
+              <a href="mailto: yournameemail.com"
+                style="color: rgb(71, 69, 69); text-decoration: none;">{{resumeData?.email}}</a>
+            </li>
+            <li class="linkedin" style="margin-bottom: 5px;">
+              <a href="https://www.google.com" target="_blank" style="color: rgb(71, 69, 69); text-decoration: none;">
+                <i class="fa fa-linkedin" aria-hidden="true"
+                  style="margin-right: 10px; font-size: 20px; vertical-align: middle;"></i>
+              </a>
+              <a href="https://www.google.com" target="_blank"
+                style="color: rgb(71, 69, 69); text-decoration: none;">{{resumeData?.links.linkedin}}</a>
+            </li>
+            <li class="github" style="margin-bottom: 5px;">
+              <a href="https://www.google.com" target="_blank" style="color: rgb(71, 69, 69); text-decoration: none;">
+                <i class="fa fa-github" aria-hidden="true"
+                  style="margin-right: 10px; font-size: 20px; vertical-align: middle;"></i>
+              </a>
+              <a href="https://www.google.com" target="_blank"
+                style="color: rgb(71, 69, 69); text-decoration: none;">{{resumeData?.links.github}}</a>
+            </li>
+          </ul>
+        </div>
+        <div class="picture-container">
+          <img src="https://cdn.pixabay.com/photo/2016/02/22/18/57/puppy-1216269_960_720.jpg" class="portrait-pic"
+            style="border-radius: 50%; height: 200px; width: 200px;">
+        </div>
+      </div>
+    </header>
+    <main style="background: white; flex: 1 0 auto; width: 100%; color: black;">
+      <section class="summ-box" style="padding: 20px; text-align: center;">
+        <p style="font-weight: 200; letter-spacing: 1px;">{{ resumeData?.profile }}</p>
+        <div class="line-break" style="width: 80%; border-top: 1px solid black; margin: 0 auto;"></div>
+      </section>
+
+
+      <section class="education-box" style="margin: 20px auto; text-align: left;">
+        <h2 class="section-title"
+          style="text-transform: uppercase; font-size: 20px; font-weight: 2; color: #2d7788; margin-top: 20px; margin-bottom: 20px;">
+          Education</h2>
+        <div *ngFor="let edu of resumeData?.education" class="item" style="margin-bottom: 30px;">
+          <div class="meta-info">
+            <div class="upper-row" style="position: relative; overflow: hidden; margin-bottom: 2px;">
+              <h3 class="degree" style="font-size: 20px; margin-top: 0; margin-bottom: 0; font-weight: bold;">{{
+                edu.degree }}</h3>
+              <div class="time" style="position: absolute; right: 0; top: 0; color: #7a8aa0;">{{ edu.year }}</div>
+            </div>
+            <div class="school" style="margin-bottom: 10px; color: #7a8aa0;">{{ edu.institution }}</div>
+          </div>
+          <div class="details">
+            <p style="font-weight: 200; letter-spacing: 1px;">{{ edu.grade }}</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="line-break" style="width: 80%; border-top: 1px solid black; margin: 0 auto;"></div>
+      <section class="experience-box" style="margin: 20px auto; text-align: left;">
+        <h2 class="section-title"
+          style="text-transform: uppercase; font-size: 20px; font-weight: 2; color: #2d7788; margin-top: 20px; margin-bottom: 20px;">
+          Work Experience
+        </h2>
+
+        <div *ngFor="let exp of resumeData?.experience" class="item" style="margin-bottom: 30px;">
+          <div class="meta-info">
+            <div class="upper-row" style="position: relative; overflow: hidden; margin-bottom: 2px;">
+              <h3 class="job-title" style="font-size: 20px; margin-top: 0; margin-bottom: 0; font-weight: bold;">
+                {{ exp.job_title }}
+              </h3>
+              <div class="time" style="position: absolute; right: 0; top: 0; color: #7a8aa0;">
+                {{ exp.duration }}
+              </div>
+            </div>
+            <div class="company" style="margin-bottom: 10px; color: #7a8aa0;">
+              {{ exp.company }} | {{ exp.location }}
+            </div>
+          </div>
+          <div class="details">
+            <p style="font-weight: 200; letter-spacing: 1px;">
+              {{ exp.description }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+
+
+      <!-- New Skills Section -->
+      <div class="line-break" style="width: 80%; border-top: 1px solid black; margin: 0 auto;"></div>
+      <section class="skills-box" style="margin: 20px auto; text-align: left;">
+        <h2 class="section-title"
+          style="text-transform: uppercase; font-size: 20px; font-weight: 2; color: #2d7788; margin-top: 20px; margin-bottom: 20px;">
+          Skills
+        </h2>
+        <ul style="list-style-type: none; padding-left: 0;">
+          <li *ngFor="let skill of resumeData?.skills"
+            style="margin-bottom: 10px; font-weight: 200; letter-spacing: 1px; font-size: 16px;">
+            <i class="fa fa-check" style="margin-right: 10px; color: #2d7788;"></i>{{ skill }}
+          </li>
+        </ul>
+      </section>
+
+      <div class="line-break"></div><!--/line-break-->
+      <section class="projects-box" style="margin: 20px auto; text-align: left;">
+        <h2 class="section-title"
+          style="text-transform: uppercase; font-size: 20px; font-weight: 2; color: #2d7788; margin-top: 20px; margin-bottom: 20px;">
+          Projects
+        </h2>
+        <div *ngFor="let project of resumeData?.projects" class="project-item" style="margin-bottom: 30px;">
+          <h3 class="project-name" style="font-size: 18px; font-weight: bold; color: #333;">{{ project.name }}</h3>
+          <p class="project-description" style="margin: 5px 0 10px 0; font-weight: 200; letter-spacing: 1px;">
+            {{ project.description }}
+          </p>
+          <p class="tech-stack" style="margin: 5px 0 10px 0;">
+            <strong style="color: #2d7788;">Technologies:</strong>
+            <span *ngFor="let tech of project.technologies; let isLast = last">
+              {{ tech }}<span *ngIf="!isLast">, </span>
+            </span>
+          </p>
+          <p *ngIf="project.link && project.link !== 'Not specified'" class="project-link" style="margin-bottom: 10px;">
+            <a [href]="project.link" target="_blank" style="text-decoration: none; color: #2d7788;">
+              View Project
+            </a>
+          </p>
+        </div>
+      </section>
+
+      <div class="line-break"></div><!--/line-break-->
+
+      <section class="misc-container" style="margin: 20px auto; text-align: left;">
+        <h2 class="section-title"
+          style="text-transform: uppercase; font-size: 20px; font-weight: 2; color: #2d7788; margin-top: 20px; margin-bottom: 20px;">
+          Miscellaneous
+        </h2>
+
+        <!-- Certifications -->
+        <div class="certifications-container" style="margin-bottom: 30px;">
+          <h3 class="portfolio-title" style="font-size: 18px; font-weight: bold; color: #333;">Certifications</h3>
+          <ul style="list-style-type: disc; padding-left: 20px;">
+            <li *ngFor="let cert of resumeData?.certifications" style="margin-bottom: 8px;">
+              <strong>Certification Name:</strong> {{ cert.certification_name }}<br>
+              <strong>Issued By:</strong> {{ cert.issuing_organization }}<br>
+              <strong>Date:</strong> {{ cert.date }}
+            </li>
+          </ul>
+        </div>
+
+
+        <!-- Hobbies -->
+        <div class="hobbies-container" style="margin-bottom: 30px;">
+          <h3 class="portfolio-title" style="font-size: 18px; font-weight: bold; color: #333;">Hobbies</h3>
+          <ul style="list-style-type: disc; padding-left: 20px;">
+            <li *ngFor="let hobby of resumeData?.hobbies" style="margin-bottom: 8px;">
+              {{ hobby }}
+            </li>
+          </ul>
+        </div>
+
+
+        <!-- publications -->
+        <section class="publications-container" style="margin: 20px auto; text-align: left;"
+          *ngIf="resumeData?.publications?.length">
+          <h2 class="section-title"
+            style="text-transform: uppercase; font-size: 20px; font-weight: 2; color: #2d7788; margin-top: 20px; margin-bottom: 20px;">
+            Publications
+          </h2>
+
+          <ul style="list-style-type: disc; padding-left: 20px;">
+            <li *ngFor="let pub of resumeData.publications" style="margin-bottom: 8px;">
+              <strong>{{ pub.publication_title }}</strong><br>
+              <a [href]="pub.publication_link" target="_blank" style="color: #007BFF;">{{ pub.publication_link
+                }}</a><br>
+              <span>{{ pub.publication_date }}</span>
+            </li>
+          </ul>
+        </section>
+
+
+        <!-- Languages -->
+        <div class="languages-container" style="margin-bottom: 30px;">
+          <h3 class="portfolio-title" style="font-size: 18px; font-weight: bold; color: #333;">Languages</h3>
+          <ul style="list-style-type: disc; padding-left: 20px;">
+            <li *ngFor="let lang of resumeData?.languages" style="margin-bottom: 8px;">
+              {{ lang.language }} - {{ lang.proficiency_level }}
+            </li>
+          </ul>
+        </div>
+        <main style="background: white; flex: 1 0 auto; width: 100%; color: black;">
+          <section class="show-basic-info" style="margin: 20px auto; text-align: left;">
+            <h2 class="section-title" style="text-transform: uppercase; font-size: 20px; font-weight: 2; color: #2d7788; margin-top: 20px; margin-bottom: 20px;">
+              Basic Information
+            </h2>
+    
+            <!-- Use ngFor to loop through basic information -->
+            <div *ngFor="let info of resumeData?.basicInfo" class="info-item" style="margin-bottom: 15px;">
+              <strong style="font-size: 16px; color: #333;">{{ info.label }}:</strong>
+              <span style="font-weight: 200; letter-spacing: 1px; font-size: 16px;">{{ info.value }}</span>
+            </div>
+          </section>
+    
+          <div class="line-break" style="width: 80%; border-top: 1px solid black; margin: 0 auto;"></div>
+    
+          <!-- Other sections like Education, Experience, etc. -->
+    
+        </main>
+
+      </section>
+
+    </main>
+  </div>
+</body>
+
+</html>
