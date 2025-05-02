@@ -1,118 +1,310 @@
-/* styles.css or component-specific styles */
-
-/* Global styles for the body */
-body {
-  font-family: sans-serif;
-  margin: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Wrapper for the profile content */
-.wrapper {
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
-  max-width: 960px;
-  width: 90%;
-  padding: 0px 30px;
-}
-
-/* Header styles */
-.header {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  width: 100%;
-  color: rgb(71, 69, 69);
-}
-
-.name-container {
-  flex: 1 1 auto;
-  text-align: center;
-}
-
-.profile-container {
-  flex: 0 0 auto;
-  display: flex;
-  padding: 10px;
-}
-
-.social-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  font-size: 17px;
-  margin-top: 10px;
-}
-
-.contact-list {
-  list-style-type: none;
-}
-
-.contact-item {
-  margin-bottom: 5px;
-}
-
-.portrait-pic {
-  border-radius: 50%;
-  height: 200px;
-  width: 200px;
-}
-
-/* Main content styles */
-main {
-  background: white;
-  flex: 1 0 auto;
-  width: 100%;
-  color: black;
-}
-
-/* Section styles */
-.summ-box, .experience-box, .education-box {
-  padding: 20px;
-  margin: 20px auto;
-  text-align: left;
-}
-
-.section-title {
-  text-transform: uppercase;
-  font-size: 20px;
-  font-weight: 2;
-  color: #2d7788;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-.line-break {
-  width: 80%;
-  border-top: 1px solid black;
+.resume-container {
+  max-width: 900px;
   margin: 0 auto;
-}
-
-.skills-container {
+  padding: 30px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  line-height: 1.6;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  background: white;
+  min-height: 400px;
+  }
+  
+  .resume-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #2d7788;
+  }
+  
+  .header-content {
+  flex: 1;
+  }
+  
+  .name-title h1 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 700;
+  color: #2d7788;
+  letter-spacing: 1px;
+  }
+  
+  .name-title h2 {
+  margin: 5px 0 0;
+  font-size: 20px;
+  font-weight: 400;
+  color: #7a8aa0;
+  }
+  
+  .contact-info {
   margin-top: 20px;
-}
-
-.skills {
-  list-style-type: none;
-}
-
-.skill {
+  }
+  
+  .contact-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  }
+  
+  .contact-info li {
+  margin-bottom: 8px;
+  }
+  
+  .contact-info a {
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s;
+  }
+  
+  .contact-info a:hover {
+  color: #2d7788;
+  }
+  
+  .contact-info i {
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+  color: #2d7788;
+  }
+  
+  .profile-pic {
+  margin-left: 30px;
+  }
+  
+  .profile-pic img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #2d7788;
+  }
+  
+  .resume-section {
+  margin-bottom: 30px;
+  }
+  
+  .section-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #2d7788;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #c5e5ee;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  }
+  
+  .section-content {
+  padding-left: 20px;
+  }
+  
+  .experience-item {
+  margin-bottom: 25px;
+  }
+  
+  .experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   margin-bottom: 5px;
-}
-
-/* Portfolio styles */
-.portfolio-container {
-  margin: 20px auto;
-}
-
-.portfolio-section {
+  }
+  
+  .experience-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  }
+  
+  .experience-date {
+  color: #7a8aa0;
+  font-size: 14px;
+  }
+  
+  .experience-subheader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-style: italic;
+  color: #7a8aa0;
+  font-size: 15px;
+  }
+  
+  .experience-description {
+  margin: 0;
+  }
+  
+  .education-item {
   margin-bottom: 20px;
-}
+  }
+  
+  .education-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
+  }
+  
+  .education-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  }
+  
+  .education-date {
+  color: #7a8aa0;
+  font-size: 14px;
+  }
+  
+  .education-subheader {
+  display: flex;
+  justify-content: space-between;
+  color: #7a8aa0;
+  font-size: 15px;
+  }
+  
+  .skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0 -5px;
+  }
+  
+  .skills-list li {
+  background: #e1f0f4;
+  color: #1c5d6e;
+  padding: 5px 12px;
+  margin: 5px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  }
+  
+  .project-item {
+  margin-bottom: 20px;
+  }
+  
+  .project-item h3 {
+  margin: 0 0 5px;
+  font-size: 17px;
+  font-weight: 600;
+  }
+  
+  .project-description {
+  margin: 0 0 8px;
+  }
+  
+  .project-tech {
+  font-size: 14px;
+  margin-bottom: 8px;
+  }
+  
+  .project-tech strong {
+  color: #2d7788;
+  }
+  
+  .project-link {
+  display: inline-block;
+  color: #2d7788;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s;
+  }
+  
+  .project-link:hover {
+  text-decoration: underline;
+  }
+  
+  .certifications ul,
+  .publications ul,
+  .languages ul,
+  .hobbies ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  }
+  
+  .certifications li,
+  .publications li,
+  .languages li,
+  .hobbies li {
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+  }
+  
+  .certifications li:before,
+  .publications li:before,
+  .languages li:before,
+  .hobbies li:before {
+  content: "•";
+  color: #2d7788;
+  position: absolute;
+  left: 0;
+  font-size: 18px;
+  line-height: 1;
+  }
+  
+  .certifications a,
+  .publications a {
+  color: #2d7788;
+  text-decoration: none;
+  }
+  
+  .certifications a:hover,
+  .publications a:hover {
+  text-decoration: underline;
+  }
+  
+  .proficiency {
+  color: #7a8aa0;
+  font-style: italic;
+  }
 
-/* Miscellaneous section */
-.misc-container {
-  margin: 20px auto;
-}
+  @media (max-width: 768px) {
+    .resume-header {
+    flex-direction: column;
+    text-align: center;
+    }
+    
+    .profile-pic {
+    margin: 20px auto 0;
+    }
+    
+    .profile-pic img {
+    width: 100px;
+    height: 100px;
+    }
+    }
+    
+    @media print {
+    body {
+    background: none;
+    font-size: 12pt;
+    }
+    
+    .resume-container {
+    box-shadow: none;
+    padding: 0;
+    max-width: 100%;
+    }
+    
+    a {
+    text-decoration: none;
+    color: #333 !important;
+    }
+    
+    .section-title {
+    page-break-after: avoid;
+    }
+    
+    .experience-item,
+    .project-item,
+    .education-item {
+    page-break-inside: avoid;
+    }
+    }

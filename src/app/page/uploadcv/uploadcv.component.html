@@ -1,24 +1,24 @@
 <div class="ai-container">
   <!-- Gradient background overlay -->
   <div class="gradient-overlay"></div>
-
+  <nav class="ai-nav navbar">
+    <div class="ai-logo">CVParser<span class="ai-highlight">.AI</span></div>
+    <div class="ai-nav-links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#api">API Docs</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
   <!-- Main content container -->
   <div class="ai-content">
     <!-- Left section with main content -->
     <div class="ai-left">
       <!-- Navigation bar -->
-      <nav class="ai-nav">
-        <div class="ai-logo">CVParser<span class="ai-highlight">.AI</span></div>
-        <div class="ai-nav-links">
-          <a href="#features">Features</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#api">API Docs</a>
-          <a href="#contact">Contact</a>
-        </div>
-      </nav>
+
 
       <!-- Main headline -->
-      <div class="ai-headline" [class.hidden]="fileUploaded">
+      <div class="ai-headline" *ngIf="!isParsed">
         <h1>Extract <span class="ai-highlight">CV Data</span> with AI Precision</h1>
         <p class="ai-subhead">The most accurate, affordable, and easy-to-integrate CV parsing API on the market</p>
 
@@ -56,30 +56,83 @@
               <mat-icon class="cancel">cancel</mat-icon>
             </div>
           </div>
+
           <div *ngIf="showBasicInfo" class="section-content">
-            <div class="form-group" *ngIf="parserData['name']">
+            <!-- Static Fields (predefined fields) -->
+            <div class="form-group" *ngIf="parserData['basicInfo']?.name?.trim()">
               <label>Name:</label>
-              <input type="text" [(ngModel)]="parserData['name']" (ngModelChange)="onDataChange()" name="name">
+              <input type="text" [(ngModel)]="parserData['basicInfo'].name" (ngModelChange)="onDataChange()" name="name"
+                class="form-control">
             </div>
-            <div class="form-group" *ngIf="parserData['email']">
+
+            <div class="form-group" *ngIf="parserData['basicInfo']?.email?.trim()">
               <label>Email:</label>
-              <input type="email" [(ngModel)]="parserData['email']" (ngModelChange)="onDataChange()" name="email">
+              <input type="email" [(ngModel)]="parserData['basicInfo'].email" (ngModelChange)="onDataChange()"
+                name="email" class="form-control">
             </div>
-            <div class="form-group" *ngIf="parserData['phone']">
+
+            <div class="form-group" *ngIf="parserData['basicInfo']?.phone?.trim()">
               <label>Phone:</label>
-              <input type="tel" [(ngModel)]="parserData['phone']" (ngModelChange)="onDataChange()" name="phone">
+              <input type="tel" [(ngModel)]="parserData['basicInfo'].phone" (ngModelChange)="onDataChange()"
+                name="phone" class="form-control">
             </div>
-            <div class="form-group" *ngIf="parserData['location']">
-              <label>Location:</label>
-              <input type="text" [(ngModel)]="parserData['location']" (ngModelChange)="onDataChange()" name="location">
+
+            <div class="form-group" *ngIf="parserData['basicInfo']?.location?.trim()">
+              <label>Location/Address:</label>
+              <input type="text" [(ngModel)]="parserData['basicInfo'].location" (ngModelChange)="onDataChange()"
+                name="location" class="form-control">
             </div>
+
+            <!-- Links Section -->
+            <div class="form-group" *ngIf="parserData['links']?.linkedin?.trim()">
+              <label>LinkedIn:</label>
+              <input type="text" [(ngModel)]="parserData['links'].linkedin" (ngModelChange)="onDataChange()"
+                name="LinkedIN" class="form-control">
+            </div>
+
+            <div class="form-group" *ngIf="parserData['links']?.github?.trim()">
+              <label>GitHub:</label>
+              <input type="text" [(ngModel)]="parserData['links'].github" (ngModelChange)="onDataChange()" name="GitHub"
+                class="form-control">
+            </div>
+
+            <!-- Dynamically Added Fields -->
+            <div *ngFor="let field of dynamicFields; let i = index" class="form-group">
+              <div *ngIf="field.isEditing">
+                <div class="form-group">
+                  <label>Field Label:</label>
+                  <input type="text" [(ngModel)]="field.label" name="label{{i}}" placeholder="Enter label name"
+                    class="form-control">
+                </div>
+                <div class="form-group">
+                  <label>Field Value:</label>
+                  <input type="text" [(ngModel)]="field.value" name="value{{i}}" placeholder="Enter value"
+                    class="form-control">
+                </div>
+
+                <!-- Save and Cancel buttons -->
+                <button class="section-btn save-btn" [disabled]="!field.label.trim() || !field.value.trim()"
+                  (click)="saveField(i)">Save</button>
+                <button class="section-btn cancel-btn" (click)="cancelField(i)">Cancel</button>
+              </div>
+
+              <!-- Show saved fields after saving -->
+              <div *ngIf="!field.isEditing" class="saved-field">
+                <label>{{field.label}}:</label>
+                <input type="text" [(ngModel)]="field.value" class="form-control" disabled>
+              </div>
+            </div>
+
+            <!-- Add Field Button -->
             <div class="btn-group">
-              <button class="section-btn delete-btn" (click)="deleteBasicInfo()">Delete Section</button>
-            </div>
-            <div *ngIf="!parserData['basic_info']">
-              <button class="section-btn add-btn" (click)="addBasicInfo()">Add Section</button>
+              <button class="section-btn add-btn" (click)="addField()">Add Field</button>
             </div>
           </div>
+
+
+
+
+
 
           <!-- Education -->
           <div class="section-header" (click)="toggleSection('education')">
@@ -92,6 +145,7 @@
               <mat-icon class="cancel">cancel</mat-icon>
             </div>
           </div>
+
           <div *ngIf="showEducation" class="section-content">
             <div *ngFor="let edu of parserData['education']; let i = index" class="education-item">
               <div class="form-group">
@@ -114,8 +168,11 @@
                 <label>Grade:</label>
                 <input type="text" [(ngModel)]="edu.grade" name="grade{{i}}">
               </div>
+              <button class="delete-btn" (click)="deleteEducation(i)">Delete Section</button>
             </div>
+            <button class="section-btn add-btn" (click)="addEducation()">Add Section</button>
           </div>
+
 
           <!-- Profile -->
           <div class="section-header" (click)="toggleSection('profile')">
@@ -131,6 +188,9 @@
           <div *ngIf="showProfile" class="section-content">
             <textarea *ngIf="parserData['profile']" [(ngModel)]="parserData['profile']" (ngModelChange)="onDataChange()"
               rows="4" class="text-area" name="profile"></textarea>
+            <!-- <div class="btn-group">
+              <button class="section-btn delete-btn" (click)="deleteProfile()">Delete Section</button>
+            </div> -->
           </div>
 
           <!-- Skills -->
@@ -147,6 +207,9 @@
           <div *ngIf="showSkills" class="section-content">
             <textarea [(ngModel)]="skillsText" (ngModelChange)="onSkillsChange()" rows="4" class="text-area"
               name="skillsText"></textarea>
+            <!-- <div class="btn-group">
+              <button class="section-btn delete-btn" (click)="deleteSkills()">Delete Section</button>
+            </div> -->
           </div>
 
           <!-- Experience -->
@@ -160,6 +223,7 @@
               <mat-icon class="cancel">cancel</mat-icon>
             </div>
           </div>
+
           <div *ngIf="showExperience" class="section-content">
             <div *ngFor="let exp of parserData['experience']; let i = index" class="experience-item">
               <div class="form-group">
@@ -178,8 +242,11 @@
                 <label>Description:</label>
                 <textarea [(ngModel)]="exp.description" rows="3" name="description{{i}}"></textarea>
               </div>
+              <button class="delete-btn" (click)="deleteExperience(i)">Delete</button>
             </div>
+            <button class="section-btn add-btn" (click)="addExperience()">Add Section</button>
           </div>
+
 
           <!-- Projects -->
           <div class="section-header" (click)="toggleSection('projects')">
@@ -197,6 +264,8 @@
               <div class="form-group">
                 <label>Name:</label>
                 <input type="text" [(ngModel)]="project.name" name="project_name{{i}}">
+                <!-- <p>{{ project.technologiesString }}</p> -->
+
               </div>
               <div class="form-group">
                 <label>Description:</label>
@@ -209,17 +278,141 @@
               </div>
               <div class="form-group">
                 <label>Link:</label>
-                <input type="text" [(ngModel)]="project.link" name="project_link{{i}}">
+                <input type="text" [(ngModel)]="project.link" name="project_link{{i}}" class="form-control">
               </div>
               <div class="btn-group">
                 <button class="section-btn delete-btn" (click)="deleteProject(i)">Delete Section</button>
               </div>
             </div>
             <button class="section-btn add-btn" (click)="addProject()">Add Section</button>
+          </div>
 
+
+          <div class="section-header" (click)="toggleSection('certifications')">
+            <div class="section-title-container">
+              <h2 class="section-title">Certifications</h2>
+              <span class="section-toggle">{{ showCertifications ? '▲' : '▼' }}</span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showCertifications" class="section-content">
+            <div *ngFor="let cert of parserData['certifications']; let i = index" class="certification-item">
+              <div class="form-group">
+                <label>Certification Name:</label>
+                <input type="text" [(ngModel)]="cert.certification_name" name="certification_name{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Issuing Organization:</label>
+                <input type="text" [(ngModel)]="cert.issuing_organization" name="issuing_organization{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Date:</label>
+                <input type="text" [(ngModel)]="cert.date" name="cert_date{{i}}">
+              </div>
+              <button class="delete-btn" (click)="deleteCertification(i)">Delete</button>
+            </div>
+            <button class="section-btn add-btn" (click)="addCertification()">Add Certification</button>
+          </div>
+
+
+
+
+
+          <!-- Hobbies -->
+          <div class="section-header" (click)="toggleSection('hobbies')">
+            <div class="section-title-container">
+              <h2 class="section-title">Hobbies</h2>
+              <span class="section-toggle">{{ showHobbies ? '▲' : '▼' }}</span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showHobbies" class="section-content">
+            <div *ngFor="let hobby of parserData['hobbies']; let i = index" class="hobby-item">
+              <div class="form-group">
+                <input type="text" [(ngModel)]="hobby.hobby" name="hobby{{i}}">
+                <button class="delete-btn" (click)="deleteHobby(i)">Delete</button>
+              </div>
+            </div>
+            <button class="section-btn add-btn" (click)="addHobby()">Add Hobby</button>
+          </div>
+
+          <!--  -->
+
+
+
+          <div class="section-header" (click)="toggleSection('publications')">
+            <div class="section-title-container">
+              <h2 class="section-title">Publications</h2>
+              <span class="section-toggle">{{ showPublications ? '▲' : '▼' }}</span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showPublications" class="section-content">
+            <div *ngFor="let pub of parserData['publications']; let i = index" class="publication-item">
+              <div class="form-group">
+                <label>Publication Title:</label>
+                <input type="text" [(ngModel)]="pub.publication_title" name="pub_title{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Publication Link:</label>
+                <input type="text" [(ngModel)]="pub.publication_link" name="pub_link{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Publication Date:</label>
+                <input type="text" [(ngModel)]="pub.publication_date" name="pub_date{{i}}">
+              </div>
+              <button class="delete-btn" (click)="deletePublication(i)">Delete</button>
+            </div>
+            <button class="section-btn add-btn" (click)="addPublication()">Add Publication</button>
+          </div>
+
+
+
+          <!-- Languages -->
+          <div class="section-header" (click)="toggleSection('languages')">
+            <div class="section-title-container">
+              <h2 class="section-title">Languages</h2>
+              <span class="section-toggle">{{ showLanguages ? '▲' : '▼' }}</span>
+            </div>
+            <div>
+              <mat-icon class="hamburger">menu</mat-icon>
+              <mat-icon class="cancel">cancel</mat-icon>
+            </div>
+          </div>
+          <div *ngIf="showLanguages" class="section-content">
+            <div *ngFor="let lang of parserData['languages']; let i = index" class="language-item">
+              <div class="form-group">
+                <label>Language:</label>
+                <input type="text" [(ngModel)]="lang.language" name="lang_language{{i}}">
+              </div>
+              <div class="form-group">
+                <label>Proficiency:</label>
+                <input type="text" [(ngModel)]="lang.proficiency_level" name="lang_proficiency{{i}}">
+              </div>
+              <button class="delete-btn" (click)="deleteLanguage(i)">Delete</button>
+            </div>
+            <button class="section-btn add-btn" (click)="addLanguage()">Add Language</button>
           </div>
 
         </div>
+        <div class="btn-data" >
+          <app-formatresume [resumeData]="parserData" [customFields]="dynamicFields" *ngIf="showPreview">
+          </app-formatresume>
+          <!-- Preview Button -->
+          <button (click)="togglePreview()" class="toggle"
+            *ngIf="parserData && objectKeys(parserData).length > 0">Preview</button>
+        </div>
+
+
 
         <div *ngIf="isParsing" class="loading-state empty-state">
           <p>Parsing resume data...</p>
@@ -228,32 +421,7 @@
           <p>No data available.</p>
         </div>
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </div>
-
-
-    <div *ngIf="fileUploaded">
-      <div *ngIf="isParsing">Parsing the file...</div>
-
-      <!-- Render DOCX Content -->
-      <div [innerHTML]="docxHtmlContent" class="docx"></div>
-
-    </div>
-
 
     <!-- Right section with upload and info -->
     <div class="ai-right" [class.hidden]="fileUploaded" style="border: 2px solid white;">
@@ -309,7 +477,24 @@
         </div>
       </div>
     </div>
+
+
+
   </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   <!-- Footer -->
   <footer class="ai-footer">
@@ -326,6 +511,7 @@
       </div>
       <div class="ai-footer-copyright">
         Made in Paris with AI • © 2023 CVParser.AI
+
       </div>
     </div>
   </footer>

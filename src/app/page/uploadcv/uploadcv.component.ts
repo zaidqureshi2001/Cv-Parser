@@ -1,21 +1,28 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CvparserService } from '../../cvparser.service';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 
 import * as mammoth from 'mammoth';
+import { FormatresumeComponent } from './formatresume/formatresume.component';
+interface DynamicField {
+  label: string;
+  value: string;
+  isEditing: boolean;
+}
 
 @Component({
   selector: 'app-uploadcv',
   standalone: true,
-  imports: [CommonModule, MatIconModule, FormsModule],
+  imports: [CommonModule, MatIconModule, FormsModule, FormatresumeComponent],
   templateUrl: './uploadcv.component.html',
   styleUrls: ['./uploadcv.component.css']
 })
 export class UploadcvComponent {
   parserData: { [key: string]: any } = {};
   isParsing: boolean = false;
+  isParsed=false;
   fileUploaded = false;
   showBasicInfo = false;
   showEducation = false;
@@ -23,41 +30,48 @@ export class UploadcvComponent {
   showSkills = false;
   showExperience = false;
   showProjects = false;
-  docxHtmlContent: string = '';
+  showCertifications = false;
+  showLanguages = false;
+  showHobbies = false;
+  showPublications = false;
+  showPreview =  false;
   skillsText: string = '';
-  
+  dynamicFields: DynamicField[] = [];
 
-  constructor(private cvParserService: CvparserService) {}
+  constructor(private cvParserService: CvparserService, private cdRef: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.initializeSkills();
     this.initializeProjects();
+    // After parsing data successfully, ensure showBasicInfo is true
+    this.showBasicInfo = true;
+    console.log('Show Basic Info:', this.showBasicInfo); // Add this for debugging
+
   }
 
   initializeSkills() {
-    // Ensure skillsText is populated correctly if skills are found in the parsed data
     if (this.parserData['skills']?.length) {
       this.skillsText = this.parserData['skills'].join(', ');
     }
   }
 
   initializeProjects() {
-    if (this.parserData['projects']?.length) {
-      this.parserData['projects'].forEach((p: any) => {
-        p.technologiesString = (p.technologies || []).join(', ');
+    const projects = this.parserData['projects'];
+    if (Array.isArray(projects)) {
+      projects.forEach((p: any) => {
+        p.technologiesString = Array.isArray(p.technologies) ? p.technologies.join(', ') : '';
       });
     }
   }
 
   onSkillsChange() {
-    // Ensure the skills array is updated properly
     if (this.skillsText) {
       this.parserData['skills'] = this.skillsText
         .split(',')
         .map((skill) => skill.trim())
         .filter(Boolean);
     } else {
-      this.parserData['skills'] = [];  // Clear skills if input is empty
+      this.parserData['skills'] = [];
     }
     console.log('Updated skills:', this.parserData['skills']);
   }
@@ -72,7 +86,6 @@ export class UploadcvComponent {
     }
   }
 
-  // Handle file upload event
   onFileUpload(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -84,7 +97,6 @@ export class UploadcvComponent {
     console.log('Updated data:', this.parserData);
   }
 
-  // Upload the file and send it to the backend for parsing
   uploadFile(file: File) {
     const formData = new FormData();
     formData.append('file', file);
@@ -96,20 +108,32 @@ export class UploadcvComponent {
       (data) => {
         console.log('Full API Response:', data);
         console.log('Parsed Data:', data.parsed_data);
-
-        // If parsed data exists, process and display it
+        console.log('Basic Info:', this.parserData['basicInfo']);
+        console.log('Show Basic Info:', this.showBasicInfo);
+        
+        console.log('Location:', this.parserData['location/address']);
+         
         if (data && data.parsed_data) {
-          if (data.docxUrl) {
-            this.convertDocxToHtml(data.docxUrl);
+          this.parserData = data.parsed_data;
+          
+
+          const projects = data.parsed_data['projects'];
+          if (Array.isArray(projects)) {
+            projects.forEach((p: any) => {
+              p.technologiesString = Array.isArray(p.technologies)
+                ? p.technologies.join(', ')
+                : '';
+            });
           }
           this.parserData = data.parsed_data;
+          this.isParsed = true;
           this.isParsing = false;
-
-          // Initialize skills if parsed data contains them
+          this.cdRef.detectChanges();
           this.initializeSkills();
-
-          // Conditionally toggle visibility based on available parsed data
           this.showBasicInfo = this.parserData['name'] || this.showBasicInfo;
+          console.log('LinkedIn:', this.parserData['links']?.linkedin);
+          console.log('GitHub:', this.parserData['links']?.github);
+
         }
       },
       (error) => {
@@ -120,17 +144,14 @@ export class UploadcvComponent {
     );
   }
 
-  // Utility method to get object keys for display
   objectKeys(obj: any): string[] {
     return obj ? Object.keys(obj) : [];
   }
 
-  // Format key to make it more readable
   formatKey(key: string): string {
     return key.replace(/_/g, ' ');
   }
 
-  // Handle file drop
   onFileDrop(event: DragEvent) {
     event.preventDefault();
     if (event.dataTransfer?.files) {
@@ -139,7 +160,6 @@ export class UploadcvComponent {
     }
   }
 
-  // Handle drag over event
   onDragOver(event: DragEvent) {
     event.preventDefault();
   }
@@ -164,40 +184,29 @@ export class UploadcvComponent {
       case 'projects':
         this.showProjects = !this.showProjects;
         break;
+      case 'certifications':
+        this.showCertifications = !this.showCertifications;
+        break;
+      case 'languages':
+        this.showLanguages = !this.showLanguages;
+        break;
+      case 'hobbies':
+        this.showHobbies = !this.showHobbies;
+        break;
+      case 'publications':
+        this.showPublications = !this.showPublications;
+        break;
     }
   }
 
-  convertDocxToHtml(docxUrl: string) {
-    console.log('Attempting to fetch DOCX file:', docxUrl);
-    fetch(docxUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch DOCX: ${response.statusText}`);
-        }
-        return response.arrayBuffer();
-      })
-      .then((buffer) => {
-        console.log('Fetched DOCX file as arrayBuffer.');
-        mammoth.convertToHtml({ arrayBuffer: buffer })
-          .then((result) => {
-            console.log('Mammoth conversion result:', result);
-            this.docxHtmlContent = result.value;
-          })
-          .catch((err) => {
-            console.error('Mammoth conversion error:', err);
-            alert('Mammoth conversion failed.');
-          });
-      })
-      .catch((err) => {
-        console.error('Error fetching DOCX file:', err);
-        alert('Failed to load DOCX file.');
-      });
+
+
+  deleteProject(index: number) {
+    (this.parserData['projects'] as any[]).splice(index, 1);
   }
-  deleteProject(index:number){
-    (this.parserData['projects'] as any []).splice(index , 1)
-  }
-  addProject(){
-    if(!this.parserData['projects']){
+
+  addProject() {
+    if (!this.parserData['projects']) {
       this.parserData['projects'] = [];
     }
 
@@ -207,20 +216,114 @@ export class UploadcvComponent {
       technologies: [],
       technologiesString: '',
       link: ''
-    })
-    
+    });
   }
-  addBasicInfo() {
-    this.parserData['basic_info'] = {
-      name: '',
-      email: '' , 
-      Phone: ''
-      // Add other fields if needed
-    };
+  addExperience() {
+    if (!this.parserData['experience']) {
+      this.parserData['experience'] = [];
+    }
+
+    this.parserData['experience'].push({
+      jobTitle: '',
+      company: '',
+      startDate: '',
+      endDate: '',
+      description: ''
+    });
+  }
+  addEducation() {
+    if (!this.parserData['education']) {
+      this.parserData['education'] = [];
+    }
+
+    this.parserData['education'].push({
+      degree: '',
+      institution: '',
+      startDate: '',
+      endDate: '',
+      description: ''
+    });
   }
 
-  deleteBasicInfo() {
-    delete this.parserData['basic_info'];
+  deleteEducation(index: number) {
+    if (this.parserData['education']) {
+      this.parserData['education'].splice(index, 1);
+    }
   }
 
+  deleteExperience(index: number) {
+    if (this.parserData['experience']) {
+      this.parserData['experience'].splice(index, 1);
+    }
+  }
+
+  addField() {
+    const newField: DynamicField = { label: '', value: '', isEditing: true };
+    this.dynamicFields.push(newField); // Add the new field
+  }
+
+  // Method to save the field after editing
+  saveField(index: number) {
+    const field = this.dynamicFields[index];
+    if (field.label.trim() && field.value.trim()) {
+      field.isEditing = false; // Save and stop editing
+    }
+  }
+
+  // Method to cancel editing a field
+  cancelField(index: number) {
+    this.dynamicFields.splice(index, 1); // Remove the field if editing is canceled
+  }
+  
+
+  // Add Language
+addLanguage() {
+  this.parserData['languages'].push({ language: '', proficiency_level: '' });
+}
+
+// Delete Language
+deleteLanguage(index: number) {
+  this.parserData['languages'].splice(index, 1);
+}
+
+// Add Certification
+addCertification() {
+  this.parserData['certifications'].push({ certification_name: '', issuing_organization: '', date: '' });
+}
+
+// Delete Certification
+deleteCertification(index: number) {
+  this.parserData['certifications'].splice(index, 1);
+}
+
+// Add Publication
+addPublication() {
+  this.parserData['publications'].push({ publication_title: '', publication_link: '', publication_date: '' });
+}
+
+// Delete Publication
+deletePublication(index: number) {
+  this.parserData['publications'].splice(index, 1);
+}
+
+  
+  
+addHobby() {
+  if (!this.parserData['hobbies']) {
+    this.parserData['hobbies'] = [];
+  }
+  this.parserData['hobbies'].push({ hobby: '' });
+}
+
+deleteHobby(index: number) {
+  if (this.parserData['hobbies']) {
+    this.parserData['hobbies'].splice(index, 1);
+  }
+}
+
+
+togglePreview() {
+  this.showPreview = !this.showPreview;
+  console.log(this.showPreview , "show preview")
+}
 }
