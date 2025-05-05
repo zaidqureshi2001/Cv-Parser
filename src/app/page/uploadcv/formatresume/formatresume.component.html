@@ -1,11 +1,14 @@
-<div class="resume-container">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<div id="resume-content" class="resume-container">
+
   <header class="resume-header">
     <div class="header-content">
       <div class="name-title">
         <h1>{{ resumeData?.basicInfo?.name }}</h1>
         <h2 *ngIf="resumeData?.basicInfo?.title">{{ resumeData?.basicInfo?.title }}</h2>
       </div>
-      
+
       <div class="contact-info">
         <ul>
           <li>
@@ -28,12 +31,17 @@
               <i class="fa fa-phone"></i>{{ resumeData?.basicInfo?.phone }}
             </a>
           </li>
+          <li *ngIf="customFields?.length">
+            <div *ngFor="let field of customFields">
+              <div class="form-group" style="margin-top: 8px;">
+                <!-- <label>{{ field.label }}:</label> -->
+                <!-- <a>{{field.value}}</a> -->
+                <span style="margin-left: 9px;">{{ field.value }}</span>
+              </div>
+            </div>
+          </li>
         </ul>
       </div>
-    </div>
-    
-    <div class="profile-pic">
-      <img src="https://cdn.pixabay.com/photo/2016/02/22/18/57/puppy-1216269_960_720.jpg" alt="Profile picture">
     </div>
   </header>
 
@@ -104,10 +112,8 @@
             <strong>Technologies:</strong>
             <span>{{ project.technologies.join(', ') }}</span>
           </div>
-          <a *ngIf="project.link && project.link !== 'Not specified'" 
-             [href]="project.link" 
-             target="_blank" 
-             class="project-link">
+          <a *ngIf="project.link && project.link !== 'Not specified'" [href]="project.link" target="_blank"
+            class="project-link">
             View Project
           </a>
         </div>
@@ -163,3 +169,4 @@
     </section>
   </main>
 </div>
+

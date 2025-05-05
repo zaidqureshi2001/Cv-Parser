@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component , Input, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, SimpleChanges } from '@angular/core';
+
 
 @Component({
   selector: 'app-formatresume',
@@ -13,10 +14,12 @@ export class FormatresumeComponent {
   @Input() customFields: { label: string; value: string }[] = [];
 
   constructor(private cdRef: ChangeDetectorRef) {}
-  
 
   ngOnChanges(changes: SimpleChanges) {
     console.log('Updated resumeData in Formatresume:', this.resumeData);
     this.cdRef.detectChanges();
   }
+
+
+  
 }

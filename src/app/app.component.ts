@@ -3,12 +3,13 @@ import { RouterOutlet } from '@angular/router';
 import { UploadcvComponent } from './page/uploadcv/uploadcv.component';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   
-  imports: [RouterOutlet , UploadcvComponent  , CommonModule  , MatIconModule],
-  templateUrl: './app.component.html',
+  imports: [RouterOutlet , UploadcvComponent , FormsModule , CommonModule  , MatIconModule,],
+  templateUrl: './app.component.html', 
   styleUrl: './app.component.css'
 })
 export class AppComponent {

@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 import { CvparserService } from '../../cvparser.service';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-
+import html2pdf from 'html2pdf.js'; // ✅ this works because of the separate .d.ts file
 import * as mammoth from 'mammoth';
 import { FormatresumeComponent } from './formatresume/formatresume.component';
+import { FormatresumeTwoComponent } from './formatresume-two/formatresume-two.component';
+import { FormatresumeThirdComponent } from './formatresume-third/formatresume-third.component';
 interface DynamicField {
   label: string;
   value: string;
@@ -15,7 +17,7 @@ interface DynamicField {
 @Component({
   selector: 'app-uploadcv',
   standalone: true,
-  imports: [CommonModule, MatIconModule, FormsModule, FormatresumeComponent],
+  imports: [CommonModule, MatIconModule, FormsModule, FormatresumeComponent , FormatresumeTwoComponent , FormatresumeThirdComponent],
   templateUrl: './uploadcv.component.html',
   styleUrls: ['./uploadcv.component.css']
 })
@@ -37,6 +39,8 @@ export class UploadcvComponent {
   showPreview =  false;
   skillsText: string = '';
   dynamicFields: DynamicField[] = [];
+  selectedFormat: 'format1' | 'format2' |'format3' = 'format1';
+
 
   constructor(private cvParserService: CvparserService, private cdRef: ChangeDetectorRef) { }
 
@@ -326,4 +330,32 @@ togglePreview() {
   this.showPreview = !this.showPreview;
   console.log(this.showPreview , "show preview")
 }
+
+
+downloadResume() {
+  setTimeout(() => {
+    const element = document.getElementById('resume-content');
+    if (element) {
+      html2pdf().from(element).set({
+        margin: 0, // Remove margin to minimize empty space
+        filename: 'resume.pdf',
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          scrollY: 0,
+          scrollX: 0,
+          windowHeight: element.scrollHeight // Ensure full height capture
+        },
+        jsPDF: {
+          unit: 'px',
+          format: [element.offsetWidth, element.scrollHeight],
+          orientation: 'portrait'
+        }
+      }).save();
+    } else {
+      console.error('resume-content not found');
+    }
+  }, 100);
+}
+
 }

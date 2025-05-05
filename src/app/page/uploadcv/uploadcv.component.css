@@ -81,7 +81,7 @@
     flex: 1;
     position: relative;
     z-index: 1;
-    max-width: 1400px;
+    max-width: 1665px;
     margin: 0 auto;
     width: 100%;
     padding: 0 20px;
@@ -990,7 +990,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 20%;
+    width: 24%;
   }
   .text-area{
     width: 100%;
@@ -1045,21 +1045,41 @@
   .delete-btn:hover {
     background-color: #d32f2f;
   }
-
-
-
-
-
-
-
   /* """""""""""""""""""" */
-
   
 .toggle{
     z-index: 9999;
 }
 /* General layout container */
 .btn-data{
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
 }
+
+.preview-btn{
+    background: #6e48aa; /* green tone */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 5px 20px;
+    margin-left: 10px;
+    /* transition: background 0.3s ease, transform 0.2s ease; */
+    z-index: 10;
+    
+}
+.preview-btn:hover {
+    background: #9269d4;
+    transform: scale(1.05);
+  }
+
+
+
+
+
+
+
+
+
+

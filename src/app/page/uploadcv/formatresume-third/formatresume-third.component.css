@@ -1,0 +1,221 @@
+.resume-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 850px;
+    background-color: white;
+    margin: 0 auto;
+    padding: 16px; /* Reduced from 40px */
+    line-height: 1.4;
+    color: #333;
+  }
+  
+/* Header Section */
+.resume-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header-text h1 {
+    font-size: 36px;
+    margin: 0;
+    color: #2a4365;
+    font-weight: 700;
+}
+
+.header-text h2 {
+    font-size: 18px;
+    margin: 5px 0 0;
+    color: #4a5568;
+    font-weight: 400;
+}
+
+.contact-info {
+    text-align: right;
+}
+
+.contact-info a {
+    color: #4a5568;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.contact-info a:hover {
+    color: #2b6cb0;
+}
+
+.contact-info i {
+    margin-right: 8px;
+    width: 16px;
+}
+
+/* Card Layout */
+.resume-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.resume-card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.resume-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #2a4365;
+    position: relative;
+    padding-bottom: 10px;
+    font-weight: 600;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 3px;
+    background: #4299e1;
+}
+
+/* Experience Cards */
+.experience-item {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.experience-item:last-child {
+    border-bottom: none;
+}
+
+.exp-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.exp-title {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.exp-date {
+    color: #718096;
+    font-size: 14px;
+}
+
+.exp-company {
+    font-style: italic;
+    color: #4a5568;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.exp-description {
+    font-size: 14px;
+    color: #4a5568;
+}
+
+/* Skills */
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.skill-pill {
+    background: #ebf8ff;
+    color: #2b6cb0;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Education */
+.education-item {
+    margin-bottom: 15px;
+}
+
+.edu-degree {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.edu-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #718096;
+    font-size: 14px;
+    margin-top: 3px;
+}
+
+/* Projects */
+.project-item {
+    margin-bottom: 20px;
+}
+
+.project-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 5px;
+}
+
+.project-tech {
+    font-size: 13px;
+    color: #718096;
+    margin: 5px 0;
+}
+
+.project-link {
+    display: inline-block;
+    color: #4299e1;
+    text-decoration: none;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* Download Button */
+.download-btn {
+    display: block;
+    margin: 40px auto 0;
+    padding: 12px 30px;
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.download-btn:hover {
+    background: #3182ce;
+}
+
+@media (max-width: 768px) {
+    .resume-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .contact-info {
+        text-align: center;
+        margin-top: 15px;
+    }
+}

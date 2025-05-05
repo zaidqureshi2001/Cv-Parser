@@ -3,6 +3,7 @@ import re
 import json
 import pdfplumber
 import docx
+import fitz
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -52,10 +53,12 @@ def parse_docx(file_path):
 
 def extract_text(file_path, file_extension):
     if file_extension == 'pdf':
-        return clean_text(parse_pdf(file_path))
+        text, urls = parse_pdf_with_fitz(file_path)
+        return text, urls
     elif file_extension == 'docx':
-        return clean_text(parse_docx(file_path))
-    return None
+        return clean_text(parse_docx(file_path)), []
+    return None, []
+
 
 def build_prompt(resume_text):
     return f"""
@@ -66,51 +69,56 @@ From the following resume text, extract the following details in structured JSON
 1. name  
 2. email  
 3. phone  
+4. location: The candidate's location. Please extract the address if available. This could include:
+  - address (street address, city, state, country, or region)
 
-4. profile: A short summary or career objective written by the candidate.
+5. profile: A short summary or career objective written by the candidate.
 
-5. skills: A list of technical and non-technical skills, tools, technologies, or proficiencies mentioned by the candidate.
+6. skills: A list of technical and non-technical skills, tools, technologies, or proficiencies mentioned by the candidate.
 
-6. education: an array of objects with:
+7. education: an array of objects with:
   - degree
   - institution
   - university (optional)
   - year
   - grade (CGPA/percentage)
 
-7. experience: an array of objects with:
+8. experience: an array of objects with:
   - job_title
   - company
   - duration (e.g., "Jan 2022 – Dec 2023")
   - location (if mentioned)
   - description (summary of responsibilities or achievements)
 
-8. projects: an array of objects with:
+9. projects: an array of objects with:
   - name (name of the project)
   - description (brief description of the project)
   - technologies (list of technologies used in the project)
-  - link (optional, a link to the project or its source code)
+  - link (a link of the project and its deployment link)
 
-9. certifications: an array of objects with:
+10. certifications: an array of objects with:
   - certification_name
   - issuing_organization
   - date (optional)
 
-10. publications: an array of objects with:
+11. publications: an array of objects with:
   - publication_title
   - publication_link (optional)
   - publication_date (optional)
 
-11. languages: an array of objects with:
+12. languages: an array of objects with:
   - language
   - proficiency_level (e.g., Fluent, Intermediate, Beginner)
 
 Return the result in valid JSON format like this:
 
 {{
-  "name": "John Doe",
-  "email": "john.doe@example.com",
-  "phone": "+1 123-456-7890",
+  "basicInfo": {{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1 123-456-7890",
+    "location": "1234 Elm Street, Springfield, IL, USA"
+  }},
   "profile": "Creative and detail-oriented developer passionate about building efficient and scalable web applications.",
   "skills": ["React", "HTML", "CSS", "JavaScript", "Git", "Tailwind CSS"],
   "education": [
@@ -166,7 +174,7 @@ Return the result in valid JSON format like this:
 }}
 
 Resume:
-\"\"\" {resume_text} \"\"\"
+\"\"\" {resume_text} \"\"\" 
 """
 
 def query_groq_qwen(prompt):
@@ -197,47 +205,119 @@ def extract_json_from_output(text):
         return {"error": "Failed to decode JSON from the model's response"}
     except Exception as e:
         return {"error": f"Error extracting JSON: {str(e)}"}
-
 @app.route('/parse-cv', methods=['POST'])
 def parse_cv():
+    # Check if the file is part of the request
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
 
+    # Get the uploaded file
     file = request.files['file']
     filename = secure_filename(file.filename)
 
+    # Check if the file extension is allowed (PDF files only)
     if not allowed_file(filename):
         return jsonify({'error': 'Only PDF files are allowed'}), 400
 
+    # Save the file to the server
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(file_path)
     print("File received:", filename)
 
-    docx_filename = filename.replace('.pdf', '.docx')
-    docx_path = os.path.join(app.config['UPLOAD_FOLDER'], docx_filename)
+    # Extract text from the uploaded PDF file
+    resume_text, extracted_urls = extract_text(file_path, 'pdf')
 
-    print(f"Converting PDF to DOCX: {docx_path}")
-    converter = Converter(file_path)
-    converter.convert(docx_path, start=0, end=None)
-    converter.close()
-
-    docx_url = f'http://localhost:5000/static/uploads/{docx_filename}'
-
-    # Extract text from the original PDF (not DOCX) for accurate parsing
-    resume_text = extract_text(file_path, 'pdf')  # ← CHANGE THIS BACK TO PDF
-
-
+    # Check if text extraction was successful
     if not resume_text:
-        return jsonify({'error': 'Failed to extract text from the DOCX file'}), 400
+        return jsonify({'error': 'Failed to extract text from the PDF file'}), 400
 
+    # Print extracted URLs for debugging
+    print("Extracted URLs:", extracted_urls)
+
+    # Build prompt for the model using the extracted resume text
     prompt = build_prompt(resume_text)
+    
+    # Query the Groq model (or whichever model you're using)
     response_text = query_groq_qwen(prompt)
+
+    # Debugging: Print raw model response
+    print("📄 Raw Model Response:\n", response_text)
+
+    # Extract structured JSON data from the model's response
     parsed_data = extract_json_from_output(response_text)
 
+    # Debugging: Print parsed data for 'projects' section
+    print("📄 Parsed Data (Projects Section):", parsed_data.get('projects', 'No projects found'))
+
+    # Initialize a list for project links
+    project_links = []
+
+    # Check if 'projects' field exists and extract links from it
+    if "projects" in parsed_data:
+        for project in parsed_data["projects"]:
+            # Ensure that the project is a dictionary and contains the 'link' or 'description' fields
+            if isinstance(project, dict):
+                # Extract the project link if available
+                project_link = (project.get("link") or "").strip()
+                if project_link and project_link != "Source code":
+                    print(f"🔗 Project Link Found: {project_link}")  # Debugging project link
+                    project_links.append(project_link)
+                else:
+                    # If no direct link, check for URLs in the project description
+                    description = project.get("description", "")
+                    print(f"🔍 Project Description: {description}")  # Debugging description
+
+                    # Use regex to find URLs in the description
+                    links_in_description = re.findall(r'https?://[^\s]+', description)
+                    if links_in_description:
+                        print(f"🔗 Links Found in Description: {links_in_description}")  # Debugging found links
+                        project_links.extend(links_in_description)
+                    else:
+                        # Additional check for common project-related keywords
+                        if "GitHub" in description or "Netlify" in description or "Live link" in description:
+                            potential_links = re.findall(r'(https?://[^\s]+)', description)
+                            if potential_links:
+                                project_links.extend(potential_links)
+
+    # Print the extracted project links for debugging
+    print("🔗 Extracted Project Links:", project_links)
+
+    # Add social media links (LinkedIn, GitHub) from the extracted URLs
+    parsed_data['links'] = {
+        "linkedin": next((url for url in extracted_urls if "linkedin.com" in url), ""),
+        "github": next((url for url in extracted_urls if "github.com" in url), "")
+    }
+
+    # Return the parsed data, extracted URLs, and project links as JSON response
     return jsonify({
-        'docxUrl': docx_url,
-        'parsed_data': parsed_data
+        'parsed_data': parsed_data,
+        'extracted_urls': extracted_urls,
+        'project_links': project_links  # Include project links in the response
     })
 
+
+
+
+
+    
+def parse_pdf_with_fitz(file_path):
+    text = ""
+    urls = []
+    doc = fitz.open(file_path)
+
+    for page_num in range(len(doc)):
+        page = doc.load_page(page_num)
+        
+        # Extract text from the page
+        text += page.get_text("text")
+
+        # Extract links (URLs)
+        for link in page.links():
+            uri = link.get('uri')
+            if uri:
+                urls.append(uri)
+    
+    return text, urls
+  
 if __name__ == '__main__':
     app.run(debug=True)

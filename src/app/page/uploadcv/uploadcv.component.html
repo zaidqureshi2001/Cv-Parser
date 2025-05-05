@@ -42,7 +42,15 @@
 
 
       <div class="resume-container" *ngIf="fileUploaded">
-        <h2 class="resume-title">Parsed Resume Data</h2>
+        <div style="display: flex;">
+          <h2 class="resume-title">Parsed Resume Data</h2>
+          <div>
+            <button (click)="togglePreview()" class="preview-btn"
+              *ngIf="parserData && objectKeys(parserData).length > 0">Preview
+            </button>
+            <button class="download-btn preview-btn"  *ngIf="showPreview" (click)="downloadResume()">Download PDF</button>
+          </div>
+        </div>
         <div *ngIf="parserData && objectKeys(parserData).length > 0" class="resume-content">
 
           <!-- Basic Info -->
@@ -404,13 +412,7 @@
           </div>
 
         </div>
-        <div class="btn-data" >
-          <app-formatresume [resumeData]="parserData" [customFields]="dynamicFields" *ngIf="showPreview">
-          </app-formatresume>
-          <!-- Preview Button -->
-          <button (click)="togglePreview()" class="toggle"
-            *ngIf="parserData && objectKeys(parserData).length > 0">Preview</button>
-        </div>
+
 
 
 
@@ -421,6 +423,7 @@
           <p>No data available.</p>
         </div>
       </div>
+
     </div>
 
     <!-- Right section with upload and info -->
@@ -478,8 +481,33 @@
       </div>
     </div>
 
+    <div class="btn-data" >
+      <button (click)="selectedFormat = 'format1'" class="preview-btn" style="margin-bottom: 10px;"  *ngIf="showPreview" >Format 1</button>
+      <button (click)="selectedFormat = 'format2'" class="preview-btn"  *ngIf="showPreview" >Format 2</button>
+      <button (click)="selectedFormat = 'format3'" class="preview-btn"  *ngIf="showPreview" >Format 3</button>
+      <!-- Format 1 -->
+      <app-formatresume 
+        *ngIf="showPreview && selectedFormat === 'format1'"
+        [resumeData]="parserData" 
+        [customFields]="dynamicFields">
+      </app-formatresume>
+    
+      <!-- Format 2 -->
+      <app-formatresume-two 
+        *ngIf="showPreview && selectedFormat === 'format2'"
+        [resumeData]="parserData" 
+        [customFields]="dynamicFields">
+      </app-formatresume-two>
+      <app-formatresume-third
+        *ngIf="showPreview && selectedFormat === 'format3'"
+        [resumeData]="parserData" 
+        [customFields]="dynamicFields">
+      </app-formatresume-third>
+    </div>
+    
 
 
+    
   </div>
 
 

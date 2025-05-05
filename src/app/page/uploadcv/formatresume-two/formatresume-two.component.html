@@ -1,0 +1,160 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<div id="resume-content" class="resume-container" style="margin: 0px; padding: 0px;">
+    <!-- Left Side (Dark) -->
+    <div class="left-side" >
+        <div class="name-title">
+            <h1>{{ resumeData?.basicInfo?.name }}</h1>
+            <h2>{{ resumeData?.basicInfo?.title }}</h2>
+        </div>
+
+        <div class="contact-info">
+            <ul>
+                <li>
+                    <a href="mailto:{{ resumeData?.basicInfo?.email }}">
+                        <i class="fas fa-envelope"></i>{{ resumeData?.basicInfo?.email }}
+                    </a>
+                </li>
+                <li *ngIf="resumeData?.basicInfo?.phone">
+                    <a href="tel:{{ resumeData?.basicInfo?.phone }}">
+                        <i class="fas fa-phone"></i>{{ resumeData?.basicInfo?.phone }}
+                    </a>
+                </li>
+                <li *ngIf="resumeData?.links?.linkedin">
+                    <a href="{{ resumeData?.links?.linkedin }}" target="_blank">
+                        <i class="fab fa-linkedin"></i>LinkedIn
+                    </a>
+                </li>
+                <li *ngIf="resumeData?.links?.github">
+                    <a href="{{ resumeData?.links?.github }}" target="_blank">
+                        <i class="fab fa-github"></i>GitHub
+                    </a>
+                </li>
+                <li *ngIf="customFields?.length">
+                    <div *ngFor="let field of customFields">
+                      <div class="form-group" style="margin-top: 8px;">
+                        <!-- <label>{{ field.label }}:</label> -->
+                        <!-- <a>{{field.value}}</a> -->
+                        <span style="margin-left: 30px;">{{ field.value }}</span>
+                      </div>
+                    </div>
+                  </li>
+            </ul>
+        </div>
+
+        <!-- Skills -->
+        <section class="skills">
+            <h2 class="section-title">Skills</h2>
+            <div class="section-content">
+                <ul class="skills-list">
+                    <li *ngFor="let skill of resumeData?.skills">
+                        <span>{{ skill }}</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Certifications -->
+        <section *ngIf="resumeData?.certifications?.length" class="certifications">
+            <h2 class="section-title">Certifications</h2>
+            <ul class="compact-list">
+                <li *ngFor="let cert of resumeData?.certifications">
+                    <strong>{{ cert.certification_name }}</strong><br>
+                    <small>{{ cert.issuing_organization }} ({{ cert.date }})</small>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Languages -->
+        <section *ngIf="resumeData?.languages?.length" class="languages">
+            <h2 class="section-title">Languages</h2>
+            <ul class="compact-list">
+                <li *ngFor="let lang of resumeData?.languages">
+                    {{ lang.language }} <small>({{ lang.proficiency_level }})</small>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Hobbies -->
+        <section *ngIf="resumeData?.hobbies?.length" class="hobbies">
+            <h2 class="section-title">Hobbies</h2>
+            <ul>
+                <li *ngFor="let hobby of resumeData?.hobbies">{{ hobby.hobby }}</li>
+            </ul>
+        </section>
+
+        <!-- Publications -->
+        <section *ngIf="resumeData?.publications?.length" class="publications">
+            <h2 class="section-title">Publications</h2>
+            <ul class="compact-list">
+                <li *ngFor="let pub of resumeData?.publications">
+                    <strong>{{ pub.publication_title }}</strong><br>
+                    <a href="{{ pub.publication_link }}" target="_blank">View</a><br>
+                    <small>{{ pub.publication_date }}</small>
+                </li>
+            </ul>
+        </section>
+    </div>
+
+
+    <!-- Right Side (White) -->
+    <div class="right-side">
+        <section class="profile-summary">
+            <h2 class="section-title">Profile</h2>
+            <div class="section-content">
+                <p>{{ resumeData?.profile }}</p>
+            </div>
+        </section>
+
+        <section class="experience">
+            <h2 class="section-title">Work Experience</h2>
+            <div class="section-content">
+                <div *ngFor="let exp of resumeData?.experience" class="experience-item">
+                    <div class="experience-header">
+                        <h3>{{ exp.job_title }}</h3>
+                        <span class="experience-date">{{ exp.duration }}</span>
+                    </div>
+                    <div class="experience-subheader">
+                        <span class="company">{{ exp.company }}</span>
+                        <span class="location">{{ exp.location }}</span>
+                    </div>
+                    <p class="experience-description">{{ exp.description }}</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="education">
+            <h2 class="section-title">Education</h2>
+            <div class="section-content">
+                <div *ngFor="let edu of resumeData?.education" class="education-item">
+                    <div class="education-header">
+                        <h3>{{ edu.degree }}</h3>
+                        <span class="education-date">{{ edu.year }}</span>
+                    </div>
+                    <div class="education-subheader">
+                        <span class="institution">{{ edu.institution }}</span>
+                        <span class="grade">{{ edu.grade }}</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="projects">
+            <h2 class="section-title">Projects</h2>
+            <div class="section-content">
+                <div *ngFor="let project of resumeData?.projects" class="project-item">
+                    <h3>{{ project.name }}</h3>
+                    <p class="project-description">{{ project.description }}</p>
+                    <div class="project-tech">
+                        <strong>Technologies:</strong>
+                        <span>{{ project.technologies.join(', ') }}</span>
+                    </div>
+                    <a *ngIf="project.link && project.link !== 'Not specified'" href="{{ project.link }}"
+                        target="_blank" class="project-link">
+                        View Project
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+

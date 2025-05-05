@@ -1,310 +1,141 @@
 .resume-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 30px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 850px;
+  background-color: white;
+  margin: 0 auto;
+  padding: 16px; /* Reduced from 40px */
+  line-height: 1.4;
   color: #333;
-  line-height: 1.6;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  background: white;
-  min-height: 400px;
-  }
-  
-  .resume-header {
+}
+
+.resume-header {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px; /* Reduced */
+  margin-bottom: 8px; /* Reduced */
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #2d7788;
-  }
-  
-  .header-content {
-  flex: 1;
-  }
-  
-  .name-title h1 {
+  flex-wrap: wrap;
+}
+
+.name-title h1 {
+  font-size: 22px; /* Reduced from 28px */
   margin: 0;
-  font-size: 36px;
-  font-weight: 700;
-  color: #2d7788;
-  letter-spacing: 1px;
-  }
-  
-  .name-title h2 {
-  margin: 5px 0 0;
-  font-size: 20px;
-  font-weight: 400;
-  color: #7a8aa0;
-  }
-  
-  .contact-info {
-  margin-top: 20px;
-  }
-  
-  .contact-info ul {
+}
+
+.name-title h2 {
+  font-size: 16px;
+  margin: 2px 0 0 0;
+}
+
+.contact-info ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  }
-  
-  .contact-info li {
-  margin-bottom: 8px;
-  }
-  
-  .contact-info a {
-  color: #333;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  transition: color 0.3s;
-  }
-  
-  .contact-info a:hover {
-  color: #2d7788;
-  }
-  
-  .contact-info i {
-  margin-right: 10px;
-  width: 20px;
-  text-align: center;
-  color: #2d7788;
-  }
-  
-  .profile-pic {
-  margin-left: 30px;
-  }
-  
-  .profile-pic img {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #2d7788;
-  }
-  
-  .resume-section {
-  margin-bottom: 30px;
-  }
-  
-  .section-title {
-  font-size: 22px;
-  font-weight: 600;
-  color: #2d7788;
-  margin-bottom: 15px;
-  padding-bottom: 5px;
-  border-bottom: 2px solid #c5e5ee;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  }
-  
-  .section-content {
-  padding-left: 20px;
-  }
-  
-  .experience-item {
-  margin-bottom: 25px;
-  }
-  
-  .experience-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 5px;
-  }
-  
-  .experience-header h3 {
+}
+.contact-info ul a {
+color:#333;
+}
+
+.contact-info li {
+  font-size: 12px;
+  margin: 2px 0;
+}
+
+.resume-section {
+  margin-bottom: 10px; /* Reduced */
+}
+
+.section-title {
+  font-size: 16px; /* Reduced */
+  font-weight: bold;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 2px;
+}
+
+.section-content p,
+.section-content ul,
+.section-content li {
+  font-size: 12px;
+  margin: 2px 0;
+}
+
+.experience-item,
+.education-item,
+.project-item {
+  margin-bottom: 6px; /* Reduced */
+}
+
+.experience-header h3,
+.education-header h3,
+.project-item h3 {
+  font-size: 14px; /* Reduced */
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  }
-  
-  .experience-date {
-  color: #7a8aa0;
-  font-size: 14px;
-  }
-  
-  .experience-subheader {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-style: italic;
-  color: #7a8aa0;
-  font-size: 15px;
-  }
-  
-  .experience-description {
-  margin: 0;
-  }
-  
-  .education-item {
-  margin-bottom: 20px;
-  }
-  
-  .education-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 5px;
-  }
-  
-  .education-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  }
-  
-  .education-date {
-  color: #7a8aa0;
-  font-size: 14px;
-  }
-  
-  .education-subheader {
-  display: flex;
-  justify-content: space-between;
-  color: #7a8aa0;
-  font-size: 15px;
-  }
-  
-  .skills-list {
+}
+
+.experience-date,
+.education-date,
+.project-tech {
+  font-size: 12px;
+}
+
+.company,
+.institution,
+.grade,
+.location {
+  font-size: 12px;
+}
+
+.skills-list {
   display: flex;
   flex-wrap: wrap;
-  list-style: none;
-  padding: 0;
-  margin: 0 -5px;
-  }
-  
-  .skills-list li {
-  background: #e1f0f4;
-  color: #1c5d6e;
-  padding: 5px 12px;
-  margin: 5px;
-  border-radius: 15px;
-  font-size: 14px;
-  font-weight: 500;
-  }
-  
-  .project-item {
-  margin-bottom: 20px;
-  }
-  
-  .project-item h3 {
-  margin: 0 0 5px;
-  font-size: 17px;
-  font-weight: 600;
-  }
-  
-  .project-description {
-  margin: 0 0 8px;
-  }
-  
-  .project-tech {
-  font-size: 14px;
-  margin-bottom: 8px;
-  }
-  
-  .project-tech strong {
-  color: #2d7788;
-  }
-  
-  .project-link {
-  display: inline-block;
-  color: #2d7788;
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.3s;
-  }
-  
-  .project-link:hover {
-  text-decoration: underline;
-  }
-  
-  .certifications ul,
-  .publications ul,
-  .languages ul,
-  .hobbies ul {
-  list-style: none;
   padding: 0;
   margin: 0;
-  }
-  
-  .certifications li,
-  .publications li,
-  .languages li,
-  .hobbies li {
-  margin-bottom: 8px;
-  padding-left: 20px;
-  position: relative;
-  }
-  
-  .certifications li:before,
-  .publications li:before,
-  .languages li:before,
-  .hobbies li:before {
-  content: "•";
-  color: #2d7788;
-  position: absolute;
-  left: 0;
-  font-size: 18px;
-  line-height: 1;
-  }
-  
-  .certifications a,
-  .publications a {
-  color: #2d7788;
-  text-decoration: none;
-  }
-  
-  .certifications a:hover,
-  .publications a:hover {
-  text-decoration: underline;
-  }
-  
-  .proficiency {
-  color: #7a8aa0;
-  font-style: italic;
-  }
+}
 
-  @media (max-width: 768px) {
-    .resume-header {
-    flex-direction: column;
-    text-align: center;
-    }
-    
-    .profile-pic {
-    margin: 20px auto 0;
-    }
-    
-    .profile-pic img {
-    width: 100px;
-    height: 100px;
-    }
-    }
-    
-    @media print {
-    body {
-    background: none;
-    font-size: 12pt;
-    }
-    
-    .resume-container {
-    box-shadow: none;
-    padding: 0;
-    max-width: 100%;
-    }
-    
-    a {
-    text-decoration: none;
-    color: #333 !important;
-    }
-    
-    .section-title {
-    page-break-after: avoid;
-    }
-    
-    .experience-item,
-    .project-item,
-    .education-item {
-    page-break-inside: avoid;
-    }
-    }
+.skills-list li {
+  list-style: none;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  margin: 2px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.download-btn {
+  display: block;
+  margin: 12px auto 0;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.download-btn:hover {
+  background: #0056b3;
+}
+
+
+.preview-btn{
+  background: #4caf50; /* green tone */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 5px 20px;
+  margin-left: 10px;
+  /* transition: background 0.3s ease, transform 0.2s ease; */
+  z-index: 10;
+  
+}
+.preview-btn:hover {
+  background: #43a047;
+  transform: scale(1.05);
+}
